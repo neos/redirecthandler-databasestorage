@@ -6,6 +6,9 @@
     "require": {
         "neos/redirecthandler": "~1.0"
     },
+    "provide": {
+        "neos/redirecthandler-storageimplementation": "1.0"
+    },
     "autoload": {
         "psr-4": {
             "Neos\\RedirectHandler\\DatabaseStorage\\": "Classes"
