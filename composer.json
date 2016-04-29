@@ -4,11 +4,16 @@
     "description": "A plugin for neos/redirecthandler to store redirects in the database",
     "license": "MIT",
     "require": {
-        "neos/redirecthandler": "*"
+        "neos/redirecthandler": "~1.0"
     },
     "autoload": {
         "psr-4": {
             "Neos\\RedirectHandler\\DatabaseStorage\\": "Classes"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
         }
     }
 }
