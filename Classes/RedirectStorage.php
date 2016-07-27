@@ -165,15 +165,18 @@ class RedirectStorage implements RedirectStorageInterface
         $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(), $newRedirect->getHost(), false);
 
         if ($existingRedirectForTargetUriPath !== null) {
-            if ($existingRedirectForTargetUriPath->getTargetUriPath() === $newRedirect->getSourceUriPath()) {
-                $this->redirectRepository->remove($existingRedirectForTargetUriPath);
-            } else {
-                throw new Exception(sprintf('A redirect exists for the target URI path "%s", please remove it first.', $newRedirect->getTargetUriPath()), 1382091526);
-            }
+            $this->persistenceManager->whitelistObject($existingRedirectForTargetUriPath);
+            $this->redirectRepository->remove($existingRedirectForTargetUriPath);
+            $this->persistenceManager->persistAll(true);
+            $this->_logger->log(sprintf('A redirect exists for the target URI path "%s", removed automatically.', $newRedirect->getTargetUriPath()), LOG_NOTICE);
         }
         if ($existingRedirectForSourceUriPath !== null) {
-            throw new Exception(sprintf('A redirect exists for the source URI path "%s", please remove it first.', $newRedirect->getSourceUriPath()), 1382091456);
+            $this->persistenceManager->whitelistObject($existingRedirectForSourceUriPath);
+            $this->redirectRepository->remove($existingRedirectForSourceUriPath);
+            $this->persistenceManager->persistAll(true);
+            $this->_logger->log(sprintf('A redirect exists for the source URI path "%s", removed automatically.', $newRedirect->getSourceUriPath()), LOG_NOTICE);
         }
+
         $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost());
         /** @var $obsoleteRedirect Redirect */
         foreach ($obsoleteRedirectInstances as $obsoleteRedirect) {
