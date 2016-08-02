@@ -165,16 +165,10 @@ class RedirectStorage implements RedirectStorageInterface
         $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(), $newRedirect->getHost(), false);
 
         if ($existingRedirectForTargetUriPath !== null) {
-            $this->persistenceManager->whitelistObject($existingRedirectForTargetUriPath);
-            $this->redirectRepository->remove($existingRedirectForTargetUriPath);
-            $this->persistenceManager->persistAll(true);
-            $this->_logger->log(sprintf('A redirect exists for the target URI path "%s", removed automatically.', $newRedirect->getTargetUriPath()), LOG_NOTICE);
+            $this->removeAndLog($existingRedirectForTargetUriPath, sprintf('Existing redirect for the target URI path "%s" removed.', $newRedirect->getTargetUriPath()));
         }
         if ($existingRedirectForSourceUriPath !== null) {
-            $this->persistenceManager->whitelistObject($existingRedirectForSourceUriPath);
-            $this->redirectRepository->remove($existingRedirectForSourceUriPath);
-            $this->persistenceManager->persistAll(true);
-            $this->_logger->log(sprintf('A redirect exists for the source URI path "%s", removed automatically.', $newRedirect->getSourceUriPath()), LOG_NOTICE);
+          $this->removeAndLog($existingRedirectForSourceUriPath, sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath()));
         }
 
         $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost());
@@ -187,6 +181,18 @@ class RedirectStorage implements RedirectStorageInterface
                 $this->redirectRepository->update($obsoleteRedirect);
             }
         }
+    }
+
+    /**
+     * @param RedirectInterface $redirect
+     * @param string $message
+     */
+    protected function removeAndLog(RedirectInterface $redirect, $message)
+    {
+      $this->persistenceManager->whitelistObject($redirect);
+      $this->redirectRepository->remove($redirect);
+      $this->persistenceManager->persistAll(true);
+      $this->_logger->log($message, LOG_NOTICE);
     }
 
     /**
