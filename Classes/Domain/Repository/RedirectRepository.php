@@ -216,4 +216,32 @@ class RedirectRepository extends Repository
             $iteration++;
         }
     }
+
+    /**
+     * Persists all entities managed by the repository and all cascading dependencies
+     *
+     * @return void
+     */
+    public function persistEntities()
+    {
+        foreach ($this->entityManager->getUnitOfWork()->getIdentityMap() as $className => $entities) {
+            if ($className === $this->entityClassName) {
+                foreach ($entities as $entityToPersist) {
+                    $this->entityManager->flush($entityToPersist);
+                }
+                $this->emitRepositoryObjectsPersisted();
+                break;
+            }
+        }
+    }
+
+    /**
+     * Signals that persistEntities() in this repository finished correctly.
+     *
+     * @Flow\Signal
+     * @return void
+     */
+    protected function emitRepositoryObjectsPersisted()
+    {
+    }
 }

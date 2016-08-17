@@ -11,7 +11,6 @@ namespace Neos\RedirectHandler\DatabaseStorage;
  * source code.
  */
 
-use Doctrine\ORM\OptimisticLockException;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
 use Neos\RedirectHandler\Exception;
@@ -21,7 +20,6 @@ use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\RedirectHandler\Traits\RedirectSignalTrait;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Mvc\Routing\RouterCachingService;
-use TYPO3\Flow\Persistence\PersistenceManagerInterface;
 
 /**
  * Database Storage for the Redirects
@@ -37,12 +35,6 @@ class RedirectStorage implements RedirectStorageInterface
      * @var RedirectRepository
      */
     protected $redirectRepository;
-
-    /**
-     * @Flow\Inject
-     * @var PersistenceManagerInterface
-     */
-    protected $persistenceManager;
 
     /**
      * @Flow\Inject
@@ -167,9 +159,11 @@ class RedirectStorage implements RedirectStorageInterface
 
         if ($existingRedirectForTargetUriPath !== null) {
             $this->removeAndLog($existingRedirectForTargetUriPath, sprintf('Existing redirect for the target URI path "%s" removed.', $newRedirect->getTargetUriPath()));
+            $this->routerCachingService->flushCachesForUriPath($existingRedirectForTargetUriPath);
         }
         if ($existingRedirectForSourceUriPath !== null) {
             $this->removeAndLog($existingRedirectForSourceUriPath, sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath()));
+            $this->routerCachingService->flushCachesForUriPath($existingRedirectForSourceUriPath);
         }
 
         $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost());
@@ -187,12 +181,12 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * @param RedirectInterface $redirect
      * @param string $message
+     * @return void
      */
     protected function removeAndLog(RedirectInterface $redirect, $message)
     {
-        $this->persistenceManager->whitelistObject($redirect);
         $this->redirectRepository->remove($redirect);
-        $this->persistenceManager->persistAll(true);
+        $this->redirectRepository->persistEntities();
         $this->_logger->log($message, LOG_NOTICE);
     }
 
