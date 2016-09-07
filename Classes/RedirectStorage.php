@@ -11,7 +11,6 @@ namespace Neos\RedirectHandler\DatabaseStorage;
  * source code.
  */
 
-use Doctrine\ORM\OptimisticLockException;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
 use Neos\RedirectHandler\Exception;
@@ -21,7 +20,6 @@ use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\RedirectHandler\Traits\RedirectSignalTrait;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Flow\Mvc\Routing\RouterCachingService;
-use TYPO3\Flow\Persistence\PersistenceManagerInterface;
 
 /**
  * Database Storage for the Redirects
@@ -37,12 +35,6 @@ class RedirectStorage implements RedirectStorageInterface
      * @var RedirectRepository
      */
     protected $redirectRepository;
-
-    /**
-     * @Flow\Inject
-     * @var PersistenceManagerInterface
-     */
-    protected $persistenceManager;
 
     /**
      * @Flow\Inject
@@ -109,7 +101,8 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * {@inheritdoc}
      */
-    public function removeByHost($host = null) {
+    public function removeByHost($host = null)
+    {
         $this->redirectRepository->removeByHost($host);
     }
 
@@ -121,7 +114,7 @@ class RedirectStorage implements RedirectStorageInterface
         $statusCode = $statusCode ?: (integer)$this->defaultStatusCode['redirect'];
         $redirects = [];
         if ($hosts !== []) {
-            array_map(function($host) use ($sourceUriPath, $targetUriPath, $statusCode, &$redirects) {
+            array_map(function ($host) use ($sourceUriPath, $targetUriPath, $statusCode, &$redirects) {
                 $redirects[] = $this->addRedirectByHost($sourceUriPath, $targetUriPath, $statusCode, $host);
             }, $hosts);
         } else {
@@ -165,15 +158,14 @@ class RedirectStorage implements RedirectStorageInterface
         $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(), $newRedirect->getHost(), false);
 
         if ($existingRedirectForTargetUriPath !== null) {
-            if ($existingRedirectForTargetUriPath->getTargetUriPath() === $newRedirect->getSourceUriPath()) {
-                $this->redirectRepository->remove($existingRedirectForTargetUriPath);
-            } else {
-                throw new Exception(sprintf('A redirect exists for the target URI path "%s", please remove it first.', $newRedirect->getTargetUriPath()), 1382091526);
-            }
+            $this->removeAndLog($existingRedirectForTargetUriPath, sprintf('Existing redirect for the target URI path "%s" removed.', $newRedirect->getTargetUriPath()));
+            $this->routerCachingService->flushCachesForUriPath($existingRedirectForTargetUriPath);
         }
         if ($existingRedirectForSourceUriPath !== null) {
-            throw new Exception(sprintf('A redirect exists for the source URI path "%s", please remove it first.', $newRedirect->getSourceUriPath()), 1382091456);
+            $this->removeAndLog($existingRedirectForSourceUriPath, sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath()));
+            $this->routerCachingService->flushCachesForUriPath($existingRedirectForSourceUriPath);
         }
+
         $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost());
         /** @var $obsoleteRedirect Redirect */
         foreach ($obsoleteRedirectInstances as $obsoleteRedirect) {
@@ -184,6 +176,18 @@ class RedirectStorage implements RedirectStorageInterface
                 $this->redirectRepository->update($obsoleteRedirect);
             }
         }
+    }
+
+    /**
+     * @param RedirectInterface $redirect
+     * @param string $message
+     * @return void
+     */
+    protected function removeAndLog(RedirectInterface $redirect, $message)
+    {
+        $this->redirectRepository->remove($redirect);
+        $this->redirectRepository->persistEntities();
+        $this->_logger->log($message, LOG_NOTICE);
     }
 
     /**
