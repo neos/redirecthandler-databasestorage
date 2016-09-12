@@ -154,16 +154,16 @@ class RedirectStorage implements RedirectStorageInterface
     {
         /** @var $existingRedirectForSourceUriPath Redirect */
         $existingRedirectForSourceUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost(), false);
-        /** @var $existingRedirectForTargetUriPath Redirect */
-        $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(), $newRedirect->getHost(), false);
-
-        if ($existingRedirectForTargetUriPath !== null) {
-            $this->removeAndLog($existingRedirectForTargetUriPath, sprintf('Existing redirect for the target URI path "%s" removed.', $newRedirect->getTargetUriPath()));
-            $this->routerCachingService->flushCachesForUriPath($existingRedirectForTargetUriPath);
-        }
         if ($existingRedirectForSourceUriPath !== null) {
             $this->removeAndLog($existingRedirectForSourceUriPath, sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath()));
-            $this->routerCachingService->flushCachesForUriPath($existingRedirectForSourceUriPath);
+            $this->routerCachingService->flushCachesForUriPath($existingRedirectForSourceUriPath->getSourceUriPath());
+        }
+
+        /** @var $existingRedirectForTargetUriPath Redirect */
+        $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(), $newRedirect->getHost(), false);
+        if ($existingRedirectForTargetUriPath !== null) {
+            $this->removeAndLog($existingRedirectForTargetUriPath, sprintf('Existing redirect for the target URI path "%s" removed.', $newRedirect->getTargetUriPath()));
+            $this->routerCachingService->flushCachesForUriPath($existingRedirectForTargetUriPath->getSourceUriPath());
         }
 
         $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost());
