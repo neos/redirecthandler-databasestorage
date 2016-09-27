@@ -108,6 +108,7 @@ class RedirectStorage implements RedirectStorageInterface
 
     /**
      * {@inheritdoc}
+     * @throws Exception if there already exists a different redirect for the source uri path
      */
     public function addRedirect($sourceUriPath, $targetUriPath, $statusCode = null, array $hosts = [])
     {
@@ -131,20 +132,31 @@ class RedirectStorage implements RedirectStorageInterface
      * @param string $targetUriPath the relative URI path the redirect should point to
      * @param integer $statusCode the status code of the redirect header
      * @param string $host the host for the current redirect
-     * @return Redirect the freshly generated redirect DTO instance
+     *
+     * @return RedirectInterface the freshly generated redirect DTO instance or the already existing redirect as DTO
+     * @throws Exception if there already exists a different redirect for the source uri and host
      * @api
      */
     protected function addRedirectByHost($sourceUriPath, $targetUriPath, $statusCode, $host = null)
     {
         $redirect = new Redirect($sourceUriPath, $targetUriPath, $statusCode, $host);
-        $this->updateDependingRedirects($redirect);
-        $this->redirectRepository->add($redirect);
-        $this->routerCachingService->flushCachesForUriPath($sourceUriPath);
-        return RedirectDto::create($redirect);
+        $existingRedirect = $this->getOneBySourceUriPathAndHost($sourceUriPath, $host, false);
+        if ($existingRedirect === null) {
+            $this->updateDependingRedirects($redirect);
+            $this->redirectRepository->add($redirect);
+            $this->routerCachingService->flushCachesForUriPath($sourceUriPath);
+            return RedirectDto::create($redirect);
+        } elseif ($existingRedirect->getTargetUriPath() === $redirect->getTargetUriPath()
+            && $existingRedirect->getStatusCode() === $redirect->getStatusCode()
+        ) {
+            return RedirectDto::create($existingRedirect);
+        } else {
+            throw new Exception('There already exists a redirect with status code "' . $existingRedirect->getStatusCode() . '" for the source uri path "' . $redirect->getSourceUriPath() . '" to "' . $existingRedirect->getTargetUriPath() . '" ' . ($host ? ' on host "' . $host . '"' : '') . '. Could not create redirect to "' . $redirect->getTargetUriPath() . '" with status code "' . $redirect->getStatusCode() . '".', 201609271250);
+        }
     }
 
     /**
-     * Updates affected redirects in order to avoid redundant or circular redirections
+     * Updates affected redirects in order to avoid redundant or circular redirects
      *
      * @param RedirectInterface $newRedirect
      * @return void
@@ -152,14 +164,12 @@ class RedirectStorage implements RedirectStorageInterface
      */
     protected function updateDependingRedirects(RedirectInterface $newRedirect)
     {
-        /** @var $existingRedirectForSourceUriPath Redirect */
         $existingRedirectForSourceUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost(), false);
         if ($existingRedirectForSourceUriPath !== null) {
             $this->removeAndLog($existingRedirectForSourceUriPath, sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath()));
             $this->routerCachingService->flushCachesForUriPath($existingRedirectForSourceUriPath->getSourceUriPath());
         }
 
-        /** @var $existingRedirectForTargetUriPath Redirect */
         $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(), $newRedirect->getHost(), false);
         if ($existingRedirectForTargetUriPath !== null) {
             $this->removeAndLog($existingRedirectForTargetUriPath, sprintf('Existing redirect for the target URI path "%s" removed.', $newRedirect->getTargetUriPath()));
@@ -174,6 +184,7 @@ class RedirectStorage implements RedirectStorageInterface
             } else {
                 $obsoleteRedirect->setTargetUriPath($newRedirect->getTargetUriPath());
                 $this->redirectRepository->update($obsoleteRedirect);
+                $this->routerCachingService->flushCachesForUriPath($obsoleteRedirect->getSourceUriPath());
             }
         }
     }
