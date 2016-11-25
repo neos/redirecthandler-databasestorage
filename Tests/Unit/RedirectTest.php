@@ -12,8 +12,8 @@ namespace Neos\RedirectHandler\DatabaseStorage\Tests\Unit;
  */
 
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
-use TYPO3\Flow\Tests\UnitTestCase;
-use TYPO3\Flow\Utility\Now;
+use Neos\Flow\Tests\UnitTestCase;
+use Neos\Flow\Utility\Now;
 
 /**
  * Test case for the Redirect class
