@@ -19,6 +19,7 @@ use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\RedirectHandler\Traits\RedirectSignalTrait;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Persistence\PersistenceManagerInterface;
 use TYPO3\Flow\Mvc\Routing\RouterCachingService;
 
 /**
@@ -47,6 +48,12 @@ class RedirectStorage implements RedirectStorageInterface
      * @var array
      */
     protected $defaultStatusCode;
+
+    /**
+     * @Flow\Inject
+     * @var PersistenceManagerInterface
+     */
+    protected $persistenceManager;
 
     /**
      * {@inheritdoc}
@@ -138,6 +145,7 @@ class RedirectStorage implements RedirectStorageInterface
     {
         $redirect = new Redirect($sourceUriPath, $targetUriPath, $statusCode, $host);
         $this->updateDependingRedirects($redirect);
+        $this->persistenceManager->persistAll();
         $this->redirectRepository->add($redirect);
         $this->routerCachingService->flushCachesForUriPath($sourceUriPath);
         return RedirectDto::create($redirect);
