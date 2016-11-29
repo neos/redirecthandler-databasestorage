@@ -18,8 +18,8 @@ use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\RedirectHandler\Traits\RedirectSignalTrait;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\Routing\RouterCachingService;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Routing\RouterCachingService;
 use TYPO3\Flow\Persistence\PersistenceManagerInterface;
 
 /**

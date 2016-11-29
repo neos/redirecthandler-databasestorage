@@ -13,8 +13,8 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
 
 use Doctrine\ORM\Mapping as ORM;
 use Neos\RedirectHandler\RedirectInterface;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Utility\Now;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Utility\Now;
 
 /**
  * A Redirect model that represents a HTTP redirect

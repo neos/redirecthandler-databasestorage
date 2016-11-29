@@ -16,9 +16,9 @@ use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
 use Neos\RedirectHandler\DatabaseStorage\RedirectStorage;
 use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectService;
-use TYPO3\Flow\Log\SystemLoggerInterface;
-use TYPO3\Flow\Mvc\Routing\RouterCachingService;
-use TYPO3\Flow\Tests\UnitTestCase;
+use Neos\Flow\Log\SystemLoggerInterface;
+use Neos\Flow\Mvc\Routing\RouterCachingService;
+use Neos\Flow\Tests\UnitTestCase;
 
 /**
  * Test case for the RedirectStorage class

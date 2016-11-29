@@ -17,9 +17,9 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Persistence\QueryInterface;
-use TYPO3\Flow\Persistence\Repository;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Persistence\QueryInterface;
+use Neos\Flow\Persistence\Repository;
 
 /**
  * Repository for redirect instances.
