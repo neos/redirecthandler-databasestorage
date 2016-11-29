@@ -20,9 +20,10 @@ use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\RedirectHandler\Traits\RedirectSignalTrait;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
+use TYPO3\Flow\Persistence\PersistenceManagerInterface;
 
 /**
- * Database Storage for the Redirects
+ * Database Storage for the Redirects.
  *
  * @Flow\Scope("singleton")
  */
@@ -32,21 +33,31 @@ class RedirectStorage implements RedirectStorageInterface
 
     /**
      * @Flow\Inject
+     *
      * @var RedirectRepository
      */
     protected $redirectRepository;
 
     /**
      * @Flow\Inject
+     *
      * @var RouterCachingService
      */
     protected $routerCachingService;
 
     /**
      * @Flow\InjectConfiguration(path="statusCode", package="Neos.RedirectHandler")
+     *
      * @var array
      */
     protected $defaultStatusCode;
+
+    /**
+     * @Flow\Inject
+     *
+     * @var PersistenceManagerInterface
+     */
+    protected $persistenceManager;
 
     /**
      * {@inheritdoc}
@@ -54,10 +65,9 @@ class RedirectStorage implements RedirectStorageInterface
     public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true)
     {
         $redirect = $this->redirectRepository->findOneBySourceUriPathAndHost($sourceUriPath, $host, $fallback);
-        if ($redirect === null) {
-            return null;
+        if ($redirect !== null) {
+            return RedirectDto::create($redirect);
         }
-        return RedirectDto::create($redirect);
     }
 
     /**
@@ -111,7 +121,7 @@ class RedirectStorage implements RedirectStorageInterface
      */
     public function addRedirect($sourceUriPath, $targetUriPath, $statusCode = null, array $hosts = [])
     {
-        $statusCode = $statusCode ?: (integer)$this->defaultStatusCode['redirect'];
+        $statusCode = $statusCode ?: (int) $this->defaultStatusCode['redirect'];
         $redirects = [];
         if ($hosts !== []) {
             array_map(function ($host) use ($sourceUriPath, $targetUriPath, $statusCode, &$redirects) {
@@ -121,15 +131,16 @@ class RedirectStorage implements RedirectStorageInterface
             $redirects[] = $this->addRedirectByHost($sourceUriPath, $targetUriPath, $statusCode);
         }
         $this->emitRedirectCreated($redirects);
+
         return $redirects;
     }
 
     /**
-     * Adds a redirect to the repository and updates related redirects accordingly
+     * Adds a redirect to the repository and updates related redirects accordingly.
      *
      * @param string $sourceUriPath the relative URI path that should trigger a redirect
      * @param string $targetUriPath the relative URI path the redirect should point to
-     * @param integer $statusCode the status code of the redirect header
+     * @param int $statusCode the status code of the redirect header
      * @param string $host the host for the current redirect
      * @return Redirect the freshly generated redirect DTO instance
      * @api
@@ -138,17 +149,19 @@ class RedirectStorage implements RedirectStorageInterface
     {
         $redirect = new Redirect($sourceUriPath, $targetUriPath, $statusCode, $host);
         $this->updateDependingRedirects($redirect);
+        $this->persistenceManager->persistAll();
         $this->redirectRepository->add($redirect);
         $this->routerCachingService->flushCachesForUriPath($sourceUriPath);
+
         return RedirectDto::create($redirect);
     }
 
     /**
-     * Updates affected redirects in order to avoid redundant or circular redirections
+     * Updates affected redirects in order to avoid redundant or circular redirections.
      *
      * @param RedirectInterface $newRedirect
-     * @return void
      * @throws Exception if creating the redirect would cause conflicts
+     * @return void
      */
     protected function updateDependingRedirects(RedirectInterface $newRedirect)
     {
@@ -191,7 +204,7 @@ class RedirectStorage implements RedirectStorageInterface
     }
 
     /**
-     * Increment the hit counter for the given redirect
+     * Increment the hit counter for the given redirect.
      *
      * @param RedirectInterface $redirect
      * @return void
