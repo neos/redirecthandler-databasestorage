@@ -1,5 +1,4 @@
 <?php
-
 namespace Neos\RedirectHandler\DatabaseStorage;
 
 /*
@@ -66,11 +65,9 @@ class RedirectStorage implements RedirectStorageInterface
     public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true)
     {
         $redirect = $this->redirectRepository->findOneBySourceUriPathAndHost($sourceUriPath, $host, $fallback);
-        if ($redirect === null) {
-            return;
+        if ($redirect !== null) {
+            return RedirectDto::create($redirect);
         }
-
-        return RedirectDto::create($redirect);
     }
 
     /**
@@ -143,11 +140,9 @@ class RedirectStorage implements RedirectStorageInterface
      *
      * @param string $sourceUriPath the relative URI path that should trigger a redirect
      * @param string $targetUriPath the relative URI path the redirect should point to
-     * @param int    $statusCode    the status code of the redirect header
-     * @param string $host          the host for the current redirect
-     *
+     * @param int $statusCode the status code of the redirect header
+     * @param string $host the host for the current redirect
      * @return Redirect the freshly generated redirect DTO instance
-     *
      * @api
      */
     protected function addRedirectByHost($sourceUriPath, $targetUriPath, $statusCode, $host = null)
@@ -165,9 +160,7 @@ class RedirectStorage implements RedirectStorageInterface
      * Updates affected redirects in order to avoid redundant or circular redirections.
      *
      * @param RedirectInterface $newRedirect
-     *
      * @throws Exception if creating the redirect would cause conflicts
-     *
      * @return void
      */
     protected function updateDependingRedirects(RedirectInterface $newRedirect)
@@ -200,8 +193,7 @@ class RedirectStorage implements RedirectStorageInterface
 
     /**
      * @param RedirectInterface $redirect
-     * @param string            $message
-     *
+     * @param string $message
      * @return void
      */
     protected function removeAndLog(RedirectInterface $redirect, $message)
@@ -215,9 +207,7 @@ class RedirectStorage implements RedirectStorageInterface
      * Increment the hit counter for the given redirect.
      *
      * @param RedirectInterface $redirect
-     *
      * @return void
-     *
      * @api
      */
     public function incrementHitCount(RedirectInterface $redirect)
