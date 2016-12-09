@@ -20,7 +20,7 @@ use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\RedirectHandler\Traits\RedirectSignalTrait;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
-use TYPO3\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
 
 /**
  * Database Storage for the Redirects.
