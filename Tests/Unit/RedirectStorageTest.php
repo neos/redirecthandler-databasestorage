@@ -72,7 +72,6 @@ class RedirectStorageTest extends UnitTestCase
         $loggerMock = $this->getMockBuilder(SystemLoggerInterface::class)
             ->getMock();
         $this->inject($this->redirectStorage, '_logger', $loggerMock);
-
     }
 
     /**
