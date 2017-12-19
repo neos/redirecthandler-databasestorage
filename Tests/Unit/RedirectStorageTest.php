@@ -176,6 +176,9 @@ class RedirectStorageTest extends UnitTestCase
      */
     public function addRedirectEmitSignalAndFlushesRouterCacheForAffectedUri()
     {
+        $mockPersistencManager = $this->getMockBuilder(PersistenceManagerInterface::class)->getMock();
+        $this->inject($this->redirectStorage, 'persistenceManager', $mockPersistencManager);
+
         $this->mockRedirectRepository
             ->expects($this->atLeastOnce())
             ->method('findByTargetUriPathAndHost')
