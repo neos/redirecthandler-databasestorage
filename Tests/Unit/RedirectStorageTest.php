@@ -19,6 +19,7 @@ use Neos\RedirectHandler\RedirectService;
 use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
 use Neos\Flow\Tests\UnitTestCase;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
 
 /**
  * Test case for the RedirectStorage class
@@ -72,7 +73,6 @@ class RedirectStorageTest extends UnitTestCase
         $loggerMock = $this->getMockBuilder(SystemLoggerInterface::class)
             ->getMock();
         $this->inject($this->redirectStorage, '_logger', $loggerMock);
-
     }
 
     /**
@@ -176,6 +176,9 @@ class RedirectStorageTest extends UnitTestCase
      */
     public function addRedirectEmitSignalAndFlushesRouterCacheForAffectedUri()
     {
+        $mockPersistencManager = $this->getMockBuilder(PersistenceManagerInterface::class)->getMock();
+        $this->inject($this->redirectStorage, 'persistenceManager', $mockPersistencManager);
+
         $this->mockRedirectRepository
             ->expects($this->atLeastOnce())
             ->method('findByTargetUriPathAndHost')
