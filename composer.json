@@ -13,10 +13,5 @@
         "psr-4": {
             "Neos\\RedirectHandler\\DatabaseStorage\\": "Classes"
         }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.0.x-dev"
-        }
     }
 }
