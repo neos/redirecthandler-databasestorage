@@ -11,7 +11,7 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Repository;
  * source code.
  */
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
@@ -31,7 +31,7 @@ class RedirectRepository extends Repository
 {
     /**
      * @Flow\Inject
-     * @var ObjectManager
+     * @var EntityManagerInterface
      */
     protected $entityManager;
 
