@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
+use Generator;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
@@ -47,9 +48,9 @@ class RedirectRepository extends Repository
      * @param string $sourceUriPath
      * @param string $host Full qualified host name
      * @param boolean $fallback If not redirect found, match a redirect with host value as null
-     * @return Redirect
+     * @return Redirect|null
      */
-    public function findOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true)
+    public function findOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true): ?Redirect
     {
         $query = $this->createQuery();
 
@@ -76,9 +77,9 @@ class RedirectRepository extends Repository
     /**
      * @param string $targetUriPath
      * @param string $host Full qualified host name
-     * @return Redirect
+     * @return Redirect|null
      */
-    public function findOneByTargetUriPathAndHost($targetUriPath, $host = null)
+    public function findOneByTargetUriPathAndHost($targetUriPath, $host = null): ?Redirect
     {
         $query = $this->createQuery();
 
@@ -98,9 +99,9 @@ class RedirectRepository extends Repository
     /**
      * @param string $targetUriPath
      * @param string $host Full qualified host name
-     * @return QueryInterface
+     * @return Generator<Redirect>
      */
-    public function findByTargetUriPathAndHost($targetUriPath, $host = null)
+    public function findByTargetUriPathAndHost($targetUriPath, $host = null): Generator
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('SELECT r FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r WHERE r.targetUriPathHash = :targetUriPathHash AND (r.host = :host OR r.host IS NULL)');
@@ -115,9 +116,9 @@ class RedirectRepository extends Repository
      *
      * @param string $host Full qualified host name
      * @param callable $callback
-     * @return \Generator<Redirect>
+     * @return Generator<Redirect>
      */
-    public function findAll($host = null, callable $callback = null)
+    public function findAll($host = null, callable $callback = null): Generator
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->entityManager->createQueryBuilder();
@@ -141,7 +142,7 @@ class RedirectRepository extends Repository
     /**
      * @return void
      */
-    public function removeAll()
+    public function removeAll(): void
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('DELETE Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r');
@@ -152,7 +153,7 @@ class RedirectRepository extends Repository
      * @param string|null $host
      * @return void
      */
-    public function removeByHost($host = null)
+    public function removeByHost($host = null): void
     {
         /** @var Query $query */
         if ($host === null) {
@@ -169,7 +170,7 @@ class RedirectRepository extends Repository
      *
      * @return array
      */
-    public function findDistinctHosts()
+    public function findDistinctHosts(): array
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('SELECT DISTINCT r.host FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r');
@@ -182,7 +183,7 @@ class RedirectRepository extends Repository
      * @param RedirectInterface $redirect
      * @return void
      */
-    public function incrementHitCount(RedirectInterface $redirect)
+    public function incrementHitCount(RedirectInterface $redirect): void
     {
         $host = $redirect->getHost();
         /** @var Query $query */
@@ -201,9 +202,9 @@ class RedirectRepository extends Repository
      *
      * @param IterableResult $iterator
      * @param callable $callback
-     * @return \Generator<RedirectDto>
+     * @return Generator<RedirectDto>
      */
-    protected function iterate(IterableResult $iterator, callable $callback = null)
+    protected function iterate(IterableResult $iterator, callable $callback = null): Generator
     {
         $iteration = 0;
         foreach ($iterator as $object) {
@@ -222,7 +223,7 @@ class RedirectRepository extends Repository
      *
      * @return void
      */
-    public function persistEntities()
+    public function persistEntities(): void
     {
         foreach ($this->entityManager->getUnitOfWork()->getIdentityMap() as $className => $entities) {
             if ($className === $this->entityClassName) {
@@ -241,7 +242,7 @@ class RedirectRepository extends Repository
      * @Flow\Signal
      * @return void
      */
-    protected function emitRepositoryObjectsPersisted()
+    protected function emitRepositoryObjectsPersisted(): void
     {
     }
 }
