@@ -67,7 +67,7 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * {@inheritdoc}
      */
-    public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true): ?RedirectDto
+    public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true): ?RedirectInterface
     {
         $redirect = $this->redirectRepository->findOneBySourceUriPathAndHost($sourceUriPath, $host, $fallback);
         if ($redirect !== null) {
