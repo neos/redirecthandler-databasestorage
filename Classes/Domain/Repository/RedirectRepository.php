@@ -11,6 +11,7 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Repository;
  * source code.
  */
 
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
@@ -114,11 +115,14 @@ class RedirectRepository extends Repository
     /**
      * Finds all objects and return an IterableResult
      *
-     * @param string $host Full qualified host name
+     * @param string $host Fully qualified host name
+     * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
+     * @param string|null $type Filters redirects by their type
      * @param callable $callback
      * @return Generator<Redirect>
+     * @throws \Exception
      */
-    public function findAll($host = null, callable $callback = null): Generator
+    public function findAll($host = null, $onlyActive = false, $type = null, callable $callback = null): Generator
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->entityManager->createQueryBuilder();
@@ -131,6 +135,16 @@ class RedirectRepository extends Repository
                 ->setParameter('host', $host);
         } else {
             $query->andWhere('r.host IS NULL');
+        }
+
+        if ($onlyActive) {
+            $query->andWhere('(r.startDateTime < :now OR r.startDateTime IS NULL) AND (r.endDateTime > :now OR r.endDateTime IS NULL)')
+                ->setParameter('now', new DateTime());
+        }
+
+        if (!empty($type)) {
+            $query->andWhere('r.type = :type')
+                ->setParameter('type', $type);
         }
 
         $query->orderBy('r.host', 'ASC');
