@@ -153,7 +153,7 @@ class RedirectStorage implements RedirectStorageInterface
                 $endDateTime,
                 &$redirects
             ) {
-                $redirects[] = $this->addRedirectByHost(
+                $redirects = array_merge($redirects, $this->addRedirectByHost(
                     $sourceUriPath,
                     $targetUriPath,
                     $statusCode,
@@ -162,10 +162,10 @@ class RedirectStorage implements RedirectStorageInterface
                     $comment,
                     $type,
                     $startDateTime,
-                    $endDateTime);
+                    $endDateTime));
             }, $hosts);
         } else {
-            $redirects[] = $this->addRedirectByHost(
+            $redirects = array_merge($redirects, $this->addRedirectByHost(
                 $sourceUriPath,
                 $targetUriPath,
                 $statusCode,
@@ -174,7 +174,7 @@ class RedirectStorage implements RedirectStorageInterface
                 $comment,
                 $type,
                 $startDateTime,
-                $endDateTime);
+                $endDateTime));
         }
         $this->emitRedirectCreated($redirects);
 
@@ -193,7 +193,7 @@ class RedirectStorage implements RedirectStorageInterface
      * @param string|null $type
      * @param DateTime|null $startDateTime
      * @param DateTime|null $endDateTime
-     * @return RedirectInterface the freshly generated redirect DTO instance
+     * @return array<RedirectInterface> the freshly generated redirect DTO instance and all updated related redirects
      * @throws IllegalObjectTypeException
      * @throws \Exception
      * @api
@@ -208,27 +208,30 @@ class RedirectStorage implements RedirectStorageInterface
         $type = null,
         DateTime $startDateTime = null,
         DateTime $endDateTime = null
-    ): RedirectInterface {
+    ): array {
         $redirect = new Redirect($sourceUriPath, $targetUriPath, $statusCode, $host, $creator, $comment, $type,
             $startDateTime, $endDateTime);
-        $this->updateDependingRedirects($redirect);
+        $updatedRedirects = $this->updateDependingRedirects($redirect);
         $this->persistenceManager->persistAll();
         $this->redirectRepository->add($redirect);
         $this->routerCachingService->flushCachesForUriPath($sourceUriPath);
 
-        return RedirectDto::create($redirect);
+        array_unshift($updatedRedirects, RedirectDto::create($redirect));
+        return $updatedRedirects;
     }
 
     /**
      * Updates affected redirects in order to avoid redundant or circular redirections.
      *
      * @param RedirectInterface $newRedirect
-     * @return void
+     * @return array
      * @throws IllegalObjectTypeException
      * @throws \Exception
      */
-    protected function updateDependingRedirects(RedirectInterface $newRedirect): void
+    protected function updateDependingRedirects(RedirectInterface $newRedirect): array
     {
+        $updatedRedirects = [];
+
         /** @var $existingRedirectForSourceUriPath Redirect */
         $existingRedirectForSourceUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getSourceUriPath(),
             $newRedirect->getHost(), false);
@@ -256,8 +259,10 @@ class RedirectStorage implements RedirectStorageInterface
             } else {
                 $obsoleteRedirect->setTargetUriPath($newRedirect->getTargetUriPath());
                 $this->redirectRepository->update($obsoleteRedirect);
+                $updatedRedirects[]= $obsoleteRedirect;
             }
         }
+        return $updatedRedirects;
     }
 
     /**
