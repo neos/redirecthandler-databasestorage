@@ -240,7 +240,7 @@ class Redirect implements RedirectInterface
      */
     public function setTargetUriPath($targetUriPath): void
     {
-        $this->targetUriPath = trim($targetUriPath, '/');
+        $this->targetUriPath = ltrim($targetUriPath, '/');
         $this->targetUriPathHash = md5($this->targetUriPath);
 
         $this->lastModificationDateTime = new Now();

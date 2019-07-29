@@ -41,7 +41,7 @@ class RedirectTest extends UnitTestCase
     {
         $redirect = new Redirect('/source/path/', '/target/path/', 301);
         $this->assertSame('source/path', $redirect->getSourceUriPath());
-        $this->assertSame('target/path', $redirect->getTargetUriPath());
+        $this->assertSame('target/path/', $redirect->getTargetUriPath());
         $this->assertSame(301, $redirect->getStatusCode());
         $this->assertSame(null, $redirect->getHost());
         $this->assertSame(null, $redirect->getLastHit());
@@ -55,7 +55,7 @@ class RedirectTest extends UnitTestCase
     {
         $redirect = new Redirect('/source/path/', '/target/path/', 303, 'www.host.com');
         $this->assertSame('source/path', $redirect->getSourceUriPath());
-        $this->assertSame('target/path', $redirect->getTargetUriPath());
+        $this->assertSame('target/path/', $redirect->getTargetUriPath());
         $this->assertSame(303, $redirect->getStatusCode());
         $this->assertSame('www.host.com', $redirect->getHost());
         $this->assertSame(null, $redirect->getLastHit());
@@ -144,7 +144,7 @@ class RedirectTest extends UnitTestCase
     public function getTargetUriPathReturnTheTargetUriPath()
     {
         $redirect = new Redirect('/source/path/', '/target/path/', 303, 'www.host.com');
-        $this->assertSame('target/path', $redirect->getTargetUriPath());
+        $this->assertSame('target/path/', $redirect->getTargetUriPath());
     }
 
     /**
@@ -153,7 +153,7 @@ class RedirectTest extends UnitTestCase
     public function getTargetUriPathHashReturnTheTargetUriPathHash()
     {
         $redirect = new Redirect('/source/path/', '/target/path/', 303, 'www.host.com');
-        $this->assertSame(md5('target/path'), $redirect->getTargetUriPathHash());
+        $this->assertSame(md5('target/path/'), $redirect->getTargetUriPathHash());
     }
 
     /**
