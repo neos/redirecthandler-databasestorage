@@ -17,6 +17,7 @@ use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Generator;
+use Iterator;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
@@ -100,9 +101,9 @@ class RedirectRepository extends Repository
     /**
      * @param string $targetUriPath
      * @param string $host Full qualified host name
-     * @return Generator<Redirect>
+     * @return Iterator<Redirect>
      */
-    public function findByTargetUriPathAndHost($targetUriPath, $host = null): Generator
+    public function findByTargetUriPathAndHost($targetUriPath, $host = null): Iterator
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('SELECT r FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r WHERE r.targetUriPathHash = :targetUriPathHash AND (r.host = :host OR r.host IS NULL)');

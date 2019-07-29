@@ -12,6 +12,7 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
  */
 
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
@@ -201,17 +202,17 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTime
+     * @return DateTimeInterface
      */
-    public function getCreationDateTime(): DateTime
+    public function getCreationDateTime(): DateTimeInterface
     {
         return $this->creationDateTime;
     }
 
     /**
-     * @return DateTime
+     * @return DateTimeInterface
      */
-    public function getLastModificationDateTime(): DateTime
+    public function getLastModificationDateTime(): DateTimeInterface
     {
         return $this->lastModificationDateTime;
     }

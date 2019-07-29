@@ -182,7 +182,7 @@ class RedirectStorageTest extends UnitTestCase
         $this->mockRedirectRepository
             ->expects($this->atLeastOnce())
             ->method('findByTargetUriPathAndHost')
-            ->willReturn([]);
+            ->willReturn(new \ArrayIterator());
 
         $this->mockRouterCachingService
             ->expects($this->once())
