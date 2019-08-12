@@ -14,6 +14,7 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Utility\Now;
@@ -301,7 +302,7 @@ class Redirect implements RedirectInterface
     /**
      * @return DateTime|null
      */
-    public function getLastHit(): ?DateTime
+    public function getLastHit(): ?DateTimeInterface
     {
         return $this->lastHit;
     }
@@ -344,7 +345,7 @@ class Redirect implements RedirectInterface
     /**
      * @return DateTime|null
      */
-    public function getStartDateTime(): ?DateTime
+    public function getStartDateTime(): ?DateTimeInterface
     {
         return $this->startDateTime;
     }
@@ -352,8 +353,16 @@ class Redirect implements RedirectInterface
     /**
      * @return DateTime|null
      */
-    public function getEndDateTime(): ?DateTime
+    public function getEndDateTime(): ?DateTimeInterface
     {
         return $this->endDateTime;
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        return RedirectDto::create($this)->jsonSerialize();
     }
 }
