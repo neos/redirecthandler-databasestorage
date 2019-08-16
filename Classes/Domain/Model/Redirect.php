@@ -14,6 +14,7 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
@@ -155,9 +156,9 @@ class Redirect implements RedirectInterface
      * @param string $creator human readable name of the creator
      * @param string $comment textual description of the redirect
      * @param string $type on of the constants in th Redirect class
-     * @param DateTime|null $startDateTime when the redirect is valid
-     * @param DateTime|null $endDateTime when the redirect has expired
-     * @throws \Exception
+     * @param DateTimeInterface|null $startDateTime when the redirect is valid
+     * @param DateTimeInterface|null $endDateTime when the redirect has expired
+     * @throws Exception
      */
     public function __construct(
         $sourceUriPath,
@@ -167,8 +168,8 @@ class Redirect implements RedirectInterface
         $creator = null,
         $comment = null,
         $type = null,
-        DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        DateTimeInterface $startDateTime = null,
+        DateTimeInterface $endDateTime = null
     ) {
         $this->sourceUriPath = trim($sourceUriPath, '/');
         $this->sourceUriPathHash = md5($this->sourceUriPath);
@@ -192,7 +193,7 @@ class Redirect implements RedirectInterface
      * @param string $targetUriPath
      * @param integer $statusCode
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function update($targetUriPath, $statusCode): void
     {
@@ -237,7 +238,7 @@ class Redirect implements RedirectInterface
     /**
      * @param string $targetUriPath
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function setTargetUriPath($targetUriPath): void
     {
@@ -266,7 +267,7 @@ class Redirect implements RedirectInterface
     /**
      * @param integer $statusCode
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function setStatusCode($statusCode): void
     {
@@ -300,7 +301,7 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTime|null
+     * @return DateTimeInterface|null
      */
     public function getLastHit(): ?DateTimeInterface
     {
@@ -309,7 +310,7 @@ class Redirect implements RedirectInterface
 
     /**
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function incrementHitCounter(): void
     {
@@ -343,7 +344,7 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTime|null
+     * @return DateTimeInterface|null
      */
     public function getStartDateTime(): ?DateTimeInterface
     {
@@ -351,7 +352,7 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTime|null
+     * @return DateTimeInterface|null
      */
     public function getEndDateTime(): ?DateTimeInterface
     {
@@ -359,9 +360,9 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return array
+     * @return mixed
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize()
     {
         return RedirectDto::create($this)->jsonSerialize();
     }
