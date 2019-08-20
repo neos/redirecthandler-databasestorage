@@ -13,7 +13,6 @@ namespace Neos\RedirectHandler\DatabaseStorage;
 
 use DateTime;
 use Generator;
-use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Persistence\Exception\IllegalObjectTypeException;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
@@ -22,10 +21,12 @@ use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 use Neos\RedirectHandler\Traits\RedirectSignalTrait;
-use Neos\RedirectHandler\RedirectService;
 use Neos\Flow\Annotations as Flow;
+use Neos\RedirectHandler\RedirectService;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Flow\Log\ThrowableStorageInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Database Storage for the Redirects.
@@ -275,7 +276,7 @@ class RedirectStorage implements RedirectStorageInterface
     {
         $this->redirectRepository->remove($redirect);
         $this->redirectRepository->persistEntities();
-        $this->_logger->log($message, LOG_NOTICE);
+        $this->_logger->notice($message);
     }
 
     /**
@@ -290,7 +291,7 @@ class RedirectStorage implements RedirectStorageInterface
         try {
             $this->redirectRepository->incrementHitCount($redirect);
         } catch (\Exception $exception) {
-            $this->_logger->logException($exception);
+            $this->_throwableStorage->logThrowable($exception);
         }
     }
 }
