@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\DatabaseStorage\Domain\Repository;
 
 /*
@@ -52,7 +54,7 @@ class RedirectRepository extends Repository
      * @param boolean $fallback If not redirect found, match a redirect with host value as null
      * @return Redirect|null
      */
-    public function findOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true): ?Redirect
+    public function findOneBySourceUriPathAndHost(string $sourceUriPath, ?string $host = null, bool $fallback = true): ?Redirect
     {
         $query = $this->createQuery();
 
@@ -81,7 +83,7 @@ class RedirectRepository extends Repository
      * @param string $host Full qualified host name
      * @return Redirect|null
      */
-    public function findOneByTargetUriPathAndHost($targetUriPath, $host = null): ?Redirect
+    public function findOneByTargetUriPathAndHost(string $targetUriPath, ?string $host = null): ?Redirect
     {
         $query = $this->createQuery();
 
@@ -103,7 +105,7 @@ class RedirectRepository extends Repository
      * @param string $host Full qualified host name
      * @return Iterator<Redirect>
      */
-    public function findByTargetUriPathAndHost($targetUriPath, $host = null): Iterator
+    public function findByTargetUriPathAndHost(string $targetUriPath, ?string $host = null): Iterator
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('SELECT r FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r WHERE r.targetUriPathHash = :targetUriPathHash AND (r.host = :host OR r.host IS NULL)');
@@ -123,7 +125,7 @@ class RedirectRepository extends Repository
      * @return Generator<Redirect>
      * @throws \Exception
      */
-    public function findAll($host = null, $onlyActive = false, $type = null, callable $callback = null): Generator
+    public function findAll(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): Generator
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->entityManager->createQueryBuilder();
@@ -168,7 +170,7 @@ class RedirectRepository extends Repository
      * @param string|null $host
      * @return void
      */
-    public function removeByHost($host = null): void
+    public function removeByHost(?string $host = null): void
     {
         /** @var Query $query */
         if ($host === null) {

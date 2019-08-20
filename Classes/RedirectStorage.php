@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\DatabaseStorage;
 
 /*
@@ -68,7 +70,7 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * {@inheritdoc}
      */
-    public function getOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true): ?RedirectInterface
+    public function getOneBySourceUriPathAndHost(string $sourceUriPath, ?string $host = null, bool $fallback = true): ?RedirectInterface
     {
         $redirect = $this->redirectRepository->findOneBySourceUriPathAndHost($sourceUriPath, $host, $fallback);
         if ($redirect !== null) {
@@ -80,7 +82,7 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * {@inheritdoc}
      */
-    public function getAll($host = null, $onlyActive = false, $type = null): Generator
+    public function getAll(?string $host = null, $onlyActive = false, ?string $type = null): Generator
     {
         foreach ($this->redirectRepository->findAll($host, $onlyActive, $type) as $redirect) {
             yield RedirectDto::create($redirect);
@@ -99,7 +101,7 @@ class RedirectStorage implements RedirectStorageInterface
      * {@inheritdoc}
      * @throws IllegalObjectTypeException
      */
-    public function removeOneBySourceUriPathAndHost($sourceUriPath, $host = null): void
+    public function removeOneBySourceUriPathAndHost($sourceUriPath, ?string $host = null): void
     {
         $redirect = $this->redirectRepository->findOneBySourceUriPathAndHost($sourceUriPath, $host);
         if ($redirect === null) {
@@ -119,7 +121,7 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * {@inheritdoc}
      */
-    public function removeByHost($host = null): void
+    public function removeByHost(?string $host = null): void
     {
         $this->redirectRepository->removeByHost($host);
     }
@@ -130,13 +132,13 @@ class RedirectStorage implements RedirectStorageInterface
      * @throws Exception
      */
     public function addRedirect(
-        $sourceUriPath,
-        $targetUriPath,
-        $statusCode = null,
+        string $sourceUriPath,
+        string $targetUriPath,
+        int $statusCode = null,
         array $hosts = [],
-        $creator = null,
-        $comment = null,
-        $type = null,
+        ?string $creator = null,
+        ?string $comment = null,
+        ?string $type = null,
         DateTime $startDateTime = null,
         DateTime $endDateTime = null
     ): array {

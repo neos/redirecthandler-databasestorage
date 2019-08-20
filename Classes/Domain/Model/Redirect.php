@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
 
 /*
@@ -152,24 +154,24 @@ class Redirect implements RedirectInterface
      * @param string $sourceUriPath relative URI path for which a redirect should be triggered
      * @param string $targetUriPath target URI path to which a redirect should be pointed
      * @param integer $statusCode status code to be send with the redirect header
-     * @param string $host Full qualified host name
-     * @param string $creator human readable name of the creator
-     * @param string $comment textual description of the redirect
-     * @param string $type on of the constants in th Redirect class
+     * @param string|null $host Full qualified host name
+     * @param string|null $creator human readable name of the creator
+     * @param string|null $comment textual description of the redirect
+     * @param string|null $type on of the constants in th Redirect class
      * @param DateTimeInterface|null $startDateTime when the redirect is valid
      * @param DateTimeInterface|null $endDateTime when the redirect has expired
      * @throws Exception
      */
     public function __construct(
-        $sourceUriPath,
-        $targetUriPath,
-        $statusCode,
-        $host = null,
-        $creator = null,
-        $comment = null,
-        $type = null,
-        DateTimeInterface $startDateTime = null,
-        DateTimeInterface $endDateTime = null
+        string $sourceUriPath,
+        string $targetUriPath,
+        int $statusCode,
+        ?string $host = null,
+        ?string $creator = null,
+        ?string $comment = null,
+        ?string $type = null,
+        ?DateTimeInterface $startDateTime = null,
+        ?DateTimeInterface $endDateTime = null
     ) {
         $this->sourceUriPath = trim($sourceUriPath, '/');
         $this->sourceUriPathHash = md5($this->sourceUriPath);
@@ -195,7 +197,7 @@ class Redirect implements RedirectInterface
      * @return void
      * @throws Exception
      */
-    public function update($targetUriPath, $statusCode): void
+    public function update(string $targetUriPath, int $statusCode): void
     {
         $this->setTargetUriPath($targetUriPath);
         $this->statusCode = $statusCode;
@@ -240,7 +242,7 @@ class Redirect implements RedirectInterface
      * @return void
      * @throws Exception
      */
-    public function setTargetUriPath($targetUriPath): void
+    public function setTargetUriPath(string $targetUriPath): void
     {
         $this->targetUriPath = ltrim($targetUriPath, '/');
         $this->targetUriPathHash = md5($this->targetUriPath);
@@ -269,7 +271,7 @@ class Redirect implements RedirectInterface
      * @return void
      * @throws Exception
      */
-    public function setStatusCode($statusCode): void
+    public function setStatusCode(int $statusCode): void
     {
         $this->statusCode = $statusCode;
 
@@ -289,7 +291,7 @@ class Redirect implements RedirectInterface
      */
     public function getHost(): ?string
     {
-        return trim($this->host) === '' ? null : $this->host;
+        return $this->host === '' ? null : $this->host;
     }
 
     /**
