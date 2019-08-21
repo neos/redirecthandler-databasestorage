@@ -22,6 +22,7 @@ use Generator;
 use Iterator;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
+use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Flow\Persistence\Repository;
