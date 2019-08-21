@@ -82,7 +82,7 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * {@inheritdoc}
      */
-    public function getAll(?string $host = null, $onlyActive = false, ?string $type = null): Generator
+    public function getAll(?string $host = null, bool $onlyActive = false, ?string $type = null): Generator
     {
         foreach ($this->redirectRepository->findAll($host, $onlyActive, $type) as $redirect) {
             yield RedirectDto::create($redirect);
@@ -101,7 +101,7 @@ class RedirectStorage implements RedirectStorageInterface
      * {@inheritdoc}
      * @throws IllegalObjectTypeException
      */
-    public function removeOneBySourceUriPathAndHost($sourceUriPath, ?string $host = null): void
+    public function removeOneBySourceUriPathAndHost(string $sourceUriPath, ?string $host = null): void
     {
         $redirect = $this->redirectRepository->findOneBySourceUriPathAndHost($sourceUriPath, $host);
         if ($redirect === null) {
