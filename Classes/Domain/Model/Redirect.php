@@ -13,10 +13,7 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
  * source code.
  */
 
-use DateTime;
-use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
@@ -38,12 +35,12 @@ use Neos\Flow\Utility\Now;
 class Redirect implements RedirectInterface
 {
     /**
-     * @var DateTime
+     * @var \DateTime
      */
     protected $creationDateTime;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      */
     protected $lastModificationDateTime;
 
@@ -111,7 +108,7 @@ class Redirect implements RedirectInterface
     protected $hitCounter;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      * @ORM\Column(nullable=true)
      */
     protected $lastHit;
@@ -139,13 +136,13 @@ class Redirect implements RedirectInterface
     protected $type;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      * @ORM\Column(nullable=true)
      */
     protected $startDateTime;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      * @ORM\Column(nullable=true)
      */
     protected $endDateTime;
@@ -158,9 +155,9 @@ class Redirect implements RedirectInterface
      * @param string|null $creator human readable name of the creator
      * @param string|null $comment textual description of the redirect
      * @param string|null $type on of the constants in th Redirect class
-     * @param DateTimeInterface|null $startDateTime when the redirect is valid
-     * @param DateTimeInterface|null $endDateTime when the redirect has expired
-     * @throws Exception
+     * @param \DateTimeInterface|null $startDateTime when the redirect is valid
+     * @param \DateTimeInterface|null $endDateTime when the redirect has expired
+     * @throws \Exception
      */
     public function __construct(
         string $sourceUriPath,
@@ -170,8 +167,8 @@ class Redirect implements RedirectInterface
         ?string $creator = null,
         ?string $comment = null,
         ?string $type = null,
-        ?DateTimeInterface $startDateTime = null,
-        ?DateTimeInterface $endDateTime = null
+        ?\DateTimeInterface $startDateTime = null,
+        ?\DateTimeInterface $endDateTime = null
     ) {
         $this->sourceUriPath = trim($sourceUriPath, '/');
         $this->sourceUriPathHash = md5($this->sourceUriPath);
@@ -195,7 +192,7 @@ class Redirect implements RedirectInterface
      * @param string $targetUriPath
      * @param integer $statusCode
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function update(string $targetUriPath, int $statusCode): void
     {
@@ -206,17 +203,17 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTimeInterface
+     * @return \DateTimeInterface
      */
-    public function getCreationDateTime(): DateTimeInterface
+    public function getCreationDateTime(): \DateTimeInterface
     {
         return $this->creationDateTime;
     }
 
     /**
-     * @return DateTimeInterface
+     * @return \DateTimeInterface
      */
-    public function getLastModificationDateTime(): DateTimeInterface
+    public function getLastModificationDateTime(): \DateTimeInterface
     {
         return $this->lastModificationDateTime;
     }
@@ -240,7 +237,7 @@ class Redirect implements RedirectInterface
     /**
      * @param string $targetUriPath
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function setTargetUriPath(string $targetUriPath): void
     {
@@ -269,7 +266,7 @@ class Redirect implements RedirectInterface
     /**
      * @param integer $statusCode
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function setStatusCode(int $statusCode): void
     {
@@ -303,16 +300,16 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTimeInterface|null
+     * @return \DateTimeInterface|null
      */
-    public function getLastHit(): ?DateTimeInterface
+    public function getLastHit(): ?\DateTimeInterface
     {
         return $this->lastHit;
     }
 
     /**
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function incrementHitCounter(): void
     {
@@ -346,17 +343,17 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return DateTimeInterface|null
+     * @return \DateTimeInterface|null
      */
-    public function getStartDateTime(): ?DateTimeInterface
+    public function getStartDateTime(): ?\DateTimeInterface
     {
         return $this->startDateTime;
     }
 
     /**
-     * @return DateTimeInterface|null
+     * @return \DateTimeInterface|null
      */
-    public function getEndDateTime(): ?DateTimeInterface
+    public function getEndDateTime(): ?\DateTimeInterface
     {
         return $this->endDateTime;
     }

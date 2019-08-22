@@ -13,14 +13,10 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Repository;
  * source code.
  */
 
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
-use Exception;
-use Generator;
-use Iterator;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\RedirectHandler\Redirect as RedirectDto;
@@ -105,9 +101,9 @@ class RedirectRepository extends Repository
     /**
      * @param string $targetUriPath
      * @param string $host Full qualified host name
-     * @return Iterator<Redirect>
+     * @return \Iterator<Redirect>
      */
-    public function findByTargetUriPathAndHost(string $targetUriPath, ?string $host = null): Iterator
+    public function findByTargetUriPathAndHost(string $targetUriPath, ?string $host = null): \Iterator
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('SELECT r FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r WHERE r.targetUriPathHash = :targetUriPathHash AND (r.host = :host OR r.host IS NULL)');
@@ -121,7 +117,7 @@ class RedirectRepository extends Repository
      * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
      * @param string|null $type Filters redirects by their type
      * @return QueryBuilder
-     * @throws Exception
+     * @throws \Exception
      */
     protected function buildQuery(bool $onlyActive = false, ?string $type = null): QueryBuilder
     {
@@ -133,7 +129,7 @@ class RedirectRepository extends Repository
 
         if ($onlyActive) {
             $query->andWhere('(r.startDateTime < :now OR r.startDateTime IS NULL) AND (r.endDateTime > :now OR r.endDateTime IS NULL)')
-                ->setParameter('now', new DateTime());
+                ->setParameter('now', new \DateTime());
         }
 
         if (!empty($type)) {
@@ -154,10 +150,10 @@ class RedirectRepository extends Repository
      * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
      * @param string|null $type Filters redirects by their type
      * @param callable $callback
-     * @return Generator<Redirect>
-     * @throws Exception
+     * @return \Generator<Redirect>
+     * @throws \Exception
      */
-    public function findAll(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): Generator
+    public function findAll(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
     {
         $query = $this->buildQuery($onlyActive, $type);
 
@@ -175,10 +171,10 @@ class RedirectRepository extends Repository
      * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
      * @param string|null $type Filters redirects by their type
      * @param callable $callback
-     * @return Generator<Redirect>
-     * @throws Exception
+     * @return \Generator<Redirect>
+     * @throws \Exception
      */
-    public function findAllWithoutHost(bool $onlyActive = false, ?string $type = null, callable $callback = null): Generator
+    public function findAllWithoutHost(bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
     {
         $query = $this->buildQuery($onlyActive, $type);
         $query->andWhere('r.host IS NULL');
@@ -249,9 +245,9 @@ class RedirectRepository extends Repository
      *
      * @param IterableResult $iterator
      * @param callable $callback
-     * @return Generator<RedirectDto>
+     * @return \Generator<RedirectDto>
      */
-    protected function iterate(IterableResult $iterator, callable $callback = null): Generator
+    protected function iterate(IterableResult $iterator, callable $callback = null): \Generator
     {
         $iteration = 0;
         foreach ($iterator as $object) {
