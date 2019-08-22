@@ -92,6 +92,16 @@ class RedirectStorage implements RedirectStorageInterface
     /**
      * {@inheritdoc}
      */
+    public function getAllWithoutHost(bool $onlyActive = false, ?string $type = null): Generator
+    {
+        foreach ($this->redirectRepository->findAllWithoutHost($onlyActive, $type) as $redirect) {
+            yield RedirectDto::create($redirect);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getDistinctHosts(): array
     {
         return $this->redirectRepository->findDistinctHosts();

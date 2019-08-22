@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 use Generator;
 use Iterator;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
@@ -117,29 +118,18 @@ class RedirectRepository extends Repository
     }
 
     /**
-     * Finds all objects and return an IterableResult
-     *
-     * @param string $host Fully qualified host name
      * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
      * @param string|null $type Filters redirects by their type
-     * @param callable $callback
-     * @return Generator<Redirect>
-     * @throws \Exception
+     * @return QueryBuilder
+     * @throws Exception
      */
-    public function findAll(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): Generator
+    protected function buildQuery(bool $onlyActive = false, ?string $type = null): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->entityManager->createQueryBuilder();
         $query = $queryBuilder
             ->select('r')
             ->from($this->getEntityClassName(), 'r');
-
-        if ($host !== null) {
-            $query->andWhere('r.host = :host')
-                ->setParameter('host', $host);
-        } else {
-            $query->andWhere('r.host IS NULL');
-        }
 
         if ($onlyActive) {
             $query->andWhere('(r.startDateTime < :now OR r.startDateTime IS NULL) AND (r.endDateTime > :now OR r.endDateTime IS NULL)')
@@ -153,6 +143,45 @@ class RedirectRepository extends Repository
 
         $query->orderBy('r.host', 'ASC');
         $query->addOrderBy('r.sourceUriPath', 'ASC');
+
+        return $query;
+    }
+
+    /**
+     * Finds all redirects filtered by the parameters and returns an IterableResult
+     *
+     * @param string $host Fully qualified host name
+     * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
+     * @param string|null $type Filters redirects by their type
+     * @param callable $callback
+     * @return Generator<Redirect>
+     * @throws Exception
+     */
+    public function findAll(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): Generator
+    {
+        $query = $this->buildQuery($onlyActive, $type);
+
+        if ($host !== null) {
+            $query->andWhere('r.host = :host')
+                ->setParameter('host', $host);
+        }
+
+        return $this->iterate($query->getQuery()->iterate(), $callback);
+    }
+
+    /**
+     * Finds all redirects without a host and filtered by the parameters and returns an IterableResult
+     *
+     * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
+     * @param string|null $type Filters redirects by their type
+     * @param callable $callback
+     * @return Generator<Redirect>
+     * @throws Exception
+     */
+    public function findAllWithoutHost(bool $onlyActive = false, ?string $type = null, callable $callback = null): Generator
+    {
+        $query = $this->buildQuery($onlyActive, $type);
+        $query->andWhere('r.host IS NULL');
 
         return $this->iterate($query->getQuery()->iterate(), $callback);
     }
