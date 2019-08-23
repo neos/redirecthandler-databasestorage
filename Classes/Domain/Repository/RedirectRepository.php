@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\DatabaseStorage\Domain\Repository;
 
 /*
@@ -17,6 +19,7 @@ use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
 use Neos\RedirectHandler\RedirectInterface;
+use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Flow\Persistence\Repository;
@@ -47,9 +50,9 @@ class RedirectRepository extends Repository
      * @param string $sourceUriPath
      * @param string $host Full qualified host name
      * @param boolean $fallback If not redirect found, match a redirect with host value as null
-     * @return Redirect
+     * @return Redirect|null
      */
-    public function findOneBySourceUriPathAndHost($sourceUriPath, $host = null, $fallback = true)
+    public function findOneBySourceUriPathAndHost(string $sourceUriPath, ?string $host = null, bool $fallback = true): ?Redirect
     {
         $query = $this->createQuery();
 
@@ -76,9 +79,9 @@ class RedirectRepository extends Repository
     /**
      * @param string $targetUriPath
      * @param string $host Full qualified host name
-     * @return Redirect
+     * @return Redirect|null
      */
-    public function findOneByTargetUriPathAndHost($targetUriPath, $host = null)
+    public function findOneByTargetUriPathAndHost(string $targetUriPath, ?string $host = null): ?Redirect
     {
         $query = $this->createQuery();
 
@@ -98,9 +101,9 @@ class RedirectRepository extends Repository
     /**
      * @param string $targetUriPath
      * @param string $host Full qualified host name
-     * @return QueryInterface
+     * @return \Iterator<Redirect>
      */
-    public function findByTargetUriPathAndHost($targetUriPath, $host = null)
+    public function findByTargetUriPathAndHost(string $targetUriPath, ?string $host = null): \Iterator
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('SELECT r FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r WHERE r.targetUriPathHash = :targetUriPathHash AND (r.host = :host OR r.host IS NULL)');
@@ -111,13 +114,12 @@ class RedirectRepository extends Repository
     }
 
     /**
-     * Finds all objects and return an IterableResult
-     *
-     * @param string $host Full qualified host name
-     * @param callable $callback
-     * @return \Generator<Redirect>
+     * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
+     * @param string|null $type Filters redirects by their type
+     * @return QueryBuilder
+     * @throws \Exception
      */
-    public function findAll($host = null, callable $callback = null)
+    protected function buildQuery(bool $onlyActive = false, ?string $type = null): QueryBuilder
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->entityManager->createQueryBuilder();
@@ -125,15 +127,57 @@ class RedirectRepository extends Repository
             ->select('r')
             ->from($this->getEntityClassName(), 'r');
 
-        if ($host !== null) {
-            $query->andWhere('r.host = :host')
-                ->setParameter('host', $host);
-        } else {
-            $query->andWhere('r.host IS NULL');
+        if ($onlyActive) {
+            $query->andWhere('(r.startDateTime < :now OR r.startDateTime IS NULL) AND (r.endDateTime > :now OR r.endDateTime IS NULL)')
+                ->setParameter('now', new \DateTime());
+        }
+
+        if (!empty($type)) {
+            $query->andWhere('r.type = :type')
+                ->setParameter('type', $type);
         }
 
         $query->orderBy('r.host', 'ASC');
         $query->addOrderBy('r.sourceUriPath', 'ASC');
+
+        return $query;
+    }
+
+    /**
+     * Finds all redirects filtered by the parameters and returns an IterableResult
+     *
+     * @param string $host Fully qualified host name
+     * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
+     * @param string|null $type Filters redirects by their type
+     * @param callable $callback
+     * @return \Generator<Redirect>
+     * @throws \Exception
+     */
+    public function findAll(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
+    {
+        $query = $this->buildQuery($onlyActive, $type);
+
+        if ($host !== null) {
+            $query->andWhere('r.host = :host')
+                ->setParameter('host', $host);
+        }
+
+        return $this->iterate($query->getQuery()->iterate(), $callback);
+    }
+
+    /**
+     * Finds all redirects without a host and filtered by the parameters and returns an IterableResult
+     *
+     * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
+     * @param string|null $type Filters redirects by their type
+     * @param callable $callback
+     * @return \Generator<Redirect>
+     * @throws \Exception
+     */
+    public function findAllWithoutHost(bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
+    {
+        $query = $this->buildQuery($onlyActive, $type);
+        $query->andWhere('r.host IS NULL');
 
         return $this->iterate($query->getQuery()->iterate(), $callback);
     }
@@ -141,7 +185,7 @@ class RedirectRepository extends Repository
     /**
      * @return void
      */
-    public function removeAll()
+    public function removeAll(): void
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('DELETE Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r');
@@ -152,7 +196,7 @@ class RedirectRepository extends Repository
      * @param string|null $host
      * @return void
      */
-    public function removeByHost($host = null)
+    public function removeByHost(?string $host = null): void
     {
         /** @var Query $query */
         if ($host === null) {
@@ -169,7 +213,7 @@ class RedirectRepository extends Repository
      *
      * @return array
      */
-    public function findDistinctHosts()
+    public function findDistinctHosts(): array
     {
         /** @var Query $query */
         $query = $this->entityManager->createQuery('SELECT DISTINCT r.host FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r');
@@ -182,7 +226,7 @@ class RedirectRepository extends Repository
      * @param RedirectInterface $redirect
      * @return void
      */
-    public function incrementHitCount(RedirectInterface $redirect)
+    public function incrementHitCount(RedirectInterface $redirect): void
     {
         $host = $redirect->getHost();
         /** @var Query $query */
@@ -203,7 +247,7 @@ class RedirectRepository extends Repository
      * @param callable $callback
      * @return \Generator<RedirectDto>
      */
-    protected function iterate(IterableResult $iterator, callable $callback = null)
+    protected function iterate(IterableResult $iterator, callable $callback = null): \Generator
     {
         $iteration = 0;
         foreach ($iterator as $object) {
@@ -222,7 +266,7 @@ class RedirectRepository extends Repository
      *
      * @return void
      */
-    public function persistEntities()
+    public function persistEntities(): void
     {
         foreach ($this->entityManager->getUnitOfWork()->getIdentityMap() as $className => $entities) {
             if ($className === $this->entityClassName) {
@@ -241,7 +285,7 @@ class RedirectRepository extends Repository
      * @Flow\Signal
      * @return void
      */
-    protected function emitRepositoryObjectsPersisted()
+    protected function emitRepositoryObjectsPersisted(): void
     {
     }
 }

@@ -16,10 +16,10 @@ use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
 use Neos\RedirectHandler\DatabaseStorage\RedirectStorage;
 use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectService;
-use Neos\Flow\Log\SystemLoggerInterface;
 use Neos\Flow\Mvc\Routing\RouterCachingService;
 use Neos\Flow\Tests\UnitTestCase;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Test case for the RedirectStorage class
@@ -70,7 +70,7 @@ class RedirectStorageTest extends UnitTestCase
             ->getMock();
         $this->inject($this->redirectStorage, '_redirectService', $this->redirectServiceMock);
 
-        $loggerMock = $this->getMockBuilder(SystemLoggerInterface::class)
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMock();
         $this->inject($this->redirectStorage, '_logger', $loggerMock);
     }
@@ -182,7 +182,7 @@ class RedirectStorageTest extends UnitTestCase
         $this->mockRedirectRepository
             ->expects($this->atLeastOnce())
             ->method('findByTargetUriPathAndHost')
-            ->willReturn([]);
+            ->willReturn(new \ArrayIterator());
 
         $this->mockRouterCachingService
             ->expects($this->once())

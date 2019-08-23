@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
 
 /*
@@ -12,6 +14,7 @@ namespace Neos\RedirectHandler\DatabaseStorage\Domain\Model;
  */
 
 use Doctrine\ORM\Mapping as ORM;
+use Neos\RedirectHandler\Redirect as RedirectDto;
 use Neos\RedirectHandler\RedirectInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Utility\Now;
@@ -23,10 +26,10 @@ use Neos\Flow\Utility\Now;
  *
  * @Flow\Entity
  * @ORM\Table(
- * 	indexes={
+ *    indexes={
  * 		@ORM\Index(name="sourceuripathhash",columns={"sourceuripathhash","host"}),
  * 		@ORM\Index(name="targeturipathhash",columns={"targeturipathhash","host"})
- * 	}
+ *    }
  * )
  */
 class Redirect implements RedirectInterface
@@ -111,18 +114,73 @@ class Redirect implements RedirectInterface
     protected $lastHit;
 
     /**
+     * Human readable name of the creator
+     *
+     * @var string
+     * @ORM\Column(nullable=true)
+     */
+    protected $creator;
+
+    /**
+     * Human readable description
+     *
+     * @var string
+     * @ORM\Column(nullable=true)
+     */
+    protected $comment;
+
+    /**
+     * @ORM\Column(options={"default": "generated"})
+     * @var string
+     */
+    protected $type;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(nullable=true)
+     */
+    protected $startDateTime;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(nullable=true)
+     */
+    protected $endDateTime;
+
+    /**
      * @param string $sourceUriPath relative URI path for which a redirect should be triggered
      * @param string $targetUriPath target URI path to which a redirect should be pointed
      * @param integer $statusCode status code to be send with the redirect header
-     * @param string $host Full qualified host name
+     * @param string|null $host Full qualified host name
+     * @param string|null $creator human readable name of the creator
+     * @param string|null $comment textual description of the redirect
+     * @param string|null $type on of the constants in th Redirect class
+     * @param \DateTimeInterface|null $startDateTime when the redirect is valid
+     * @param \DateTimeInterface|null $endDateTime when the redirect has expired
+     * @throws \Exception
      */
-    public function __construct($sourceUriPath, $targetUriPath, $statusCode, $host = null)
-    {
+    public function __construct(
+        string $sourceUriPath,
+        string $targetUriPath,
+        int $statusCode,
+        ?string $host = null,
+        ?string $creator = null,
+        ?string $comment = null,
+        ?string $type = null,
+        ?\DateTimeInterface $startDateTime = null,
+        ?\DateTimeInterface $endDateTime = null
+    ) {
         $this->sourceUriPath = trim($sourceUriPath, '/');
         $this->sourceUriPathHash = md5($this->sourceUriPath);
         $this->setTargetUriPath($targetUriPath);
         $this->statusCode = (integer)$statusCode;
         $this->host = $host ? trim($host) : null;
+        $this->creator = $creator;
+        $this->comment = $comment;
+        $this->type = in_array($type,
+                [self::REDIRECT_TYPE_GENERATED, self::REDIRECT_TYPE_MANUAL]) ? $type : self::REDIRECT_TYPE_GENERATED;
+        $this->startDateTime = $startDateTime;
+        $this->endDateTime = $endDateTime;
 
         $this->hitCounter = 0;
 
@@ -134,8 +192,9 @@ class Redirect implements RedirectInterface
      * @param string $targetUriPath
      * @param integer $statusCode
      * @return void
+     * @throws \Exception
      */
-    public function update($targetUriPath, $statusCode)
+    public function update(string $targetUriPath, int $statusCode): void
     {
         $this->setTargetUriPath($targetUriPath);
         $this->statusCode = $statusCode;
@@ -144,17 +203,17 @@ class Redirect implements RedirectInterface
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getCreationDateTime()
+    public function getCreationDateTime(): \DateTimeInterface
     {
         return $this->creationDateTime;
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
-    public function getLastModificationDateTime()
+    public function getLastModificationDateTime(): \DateTimeInterface
     {
         return $this->lastModificationDateTime;
     }
@@ -162,7 +221,7 @@ class Redirect implements RedirectInterface
     /**
      * @return string
      */
-    public function getSourceUriPath()
+    public function getSourceUriPath(): string
     {
         return $this->sourceUriPath;
     }
@@ -170,7 +229,7 @@ class Redirect implements RedirectInterface
     /**
      * @return string
      */
-    public function getSourceUriPathHash()
+    public function getSourceUriPathHash(): string
     {
         return $this->sourceUriPathHash;
     }
@@ -178,10 +237,11 @@ class Redirect implements RedirectInterface
     /**
      * @param string $targetUriPath
      * @return void
+     * @throws \Exception
      */
-    public function setTargetUriPath($targetUriPath)
+    public function setTargetUriPath(string $targetUriPath): void
     {
-        $this->targetUriPath = trim($targetUriPath, '/');
+        $this->targetUriPath = ltrim($targetUriPath, '/');
         $this->targetUriPathHash = md5($this->targetUriPath);
 
         $this->lastModificationDateTime = new Now();
@@ -190,7 +250,7 @@ class Redirect implements RedirectInterface
     /**
      * @return string
      */
-    public function getTargetUriPath()
+    public function getTargetUriPath(): string
     {
         return $this->targetUriPath;
     }
@@ -198,7 +258,7 @@ class Redirect implements RedirectInterface
     /**
      * @return string
      */
-    public function getTargetUriPathHash()
+    public function getTargetUriPathHash(): string
     {
         return $this->targetUriPathHash;
     }
@@ -206,8 +266,9 @@ class Redirect implements RedirectInterface
     /**
      * @param integer $statusCode
      * @return void
+     * @throws \Exception
      */
-    public function setStatusCode($statusCode)
+    public function setStatusCode(int $statusCode): void
     {
         $this->statusCode = $statusCode;
 
@@ -217,7 +278,7 @@ class Redirect implements RedirectInterface
     /**
      * @return integer
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return (integer)$this->statusCode;
     }
@@ -225,34 +286,83 @@ class Redirect implements RedirectInterface
     /**
      * @return string|null
      */
-    public function getHost()
+    public function getHost(): ?string
     {
-        return trim($this->host) === '' ? null : $this->host;
+        return $this->host === '' ? null : $this->host;
     }
 
     /**
      * @return integer
      */
-    public function getHitCounter()
+    public function getHitCounter(): int
     {
         return $this->hitCounter;
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface|null
      */
-    public function getLastHit()
+    public function getLastHit(): ?\DateTimeInterface
     {
         return $this->lastHit;
     }
 
     /**
      * @return void
+     * @throws \Exception
      */
-    public function incrementHitCounter()
+    public function incrementHitCounter(): void
     {
         $this->hitCounter++;
 
         $this->lastHit = new Now();
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCreator(): ?string
+    {
+        return $this->creator;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return \DateTimeInterface|null
+     */
+    public function getStartDateTime(): ?\DateTimeInterface
+    {
+        return $this->startDateTime;
+    }
+
+    /**
+     * @return \DateTimeInterface|null
+     */
+    public function getEndDateTime(): ?\DateTimeInterface
+    {
+        return $this->endDateTime;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function jsonSerialize()
+    {
+        return RedirectDto::create($this)->jsonSerialize();
     }
 }
