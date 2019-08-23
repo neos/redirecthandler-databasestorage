@@ -182,7 +182,7 @@ class RedirectStorage implements RedirectStorageInterface
                 $sourceUriPath,
                 $targetUriPath,
                 $statusCode,
-                [],
+                null,
                 $creator,
                 $comment,
                 $type,
