@@ -153,7 +153,7 @@ class RedirectRepository extends Repository
      * @return \Generator<Redirect>
      * @throws \Exception
      */
-    public function findAll(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
+    public function findAllWithParameters(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
     {
         $query = $this->buildQuery($onlyActive, $type);
 
