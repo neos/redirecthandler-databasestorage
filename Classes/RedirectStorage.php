@@ -84,7 +84,7 @@ class RedirectStorage implements RedirectStorageInterface
      */
     public function getAll(?string $host = null, bool $onlyActive = false, ?string $type = null): Generator
     {
-        foreach ($this->redirectRepository->findAll($host, $onlyActive, $type) as $redirect) {
+        foreach ($this->redirectRepository->findAllWithParameters($host, $onlyActive, $type) as $redirect) {
             yield RedirectDto::create($redirect);
         }
     }
