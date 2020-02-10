@@ -222,6 +222,13 @@ class RedirectStorage implements RedirectStorageInterface
         DateTime $startDateTime = null,
         DateTime $endDateTime = null
     ): array {
+        if ($startDateTime instanceof \DateTime) {
+            $startDateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+        }
+        if ($endDateTime instanceof \DateTime) {
+            $endDateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+        }
+
         $redirect = new Redirect($sourceUriPath, $targetUriPath, $statusCode, $host, $creator, $comment, $type,
             $startDateTime, $endDateTime);
         $updatedRedirects = $this->updateDependingRedirects($redirect);
