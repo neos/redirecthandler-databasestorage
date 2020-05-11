@@ -65,10 +65,11 @@ class RedirectStorageTests extends FunctionalTestCase
      */
     public function addRedirectResolvesRedirectChainsWithAbsoluteTargetUris()
     {
+        $sourceHost = 'www.example.org';
         $sourcePath = 'some/old/product';
-        $oldTargetUri = 'https://www.example.org/productA';
+        $oldTargetUri = "https://$sourceHost/productA";
         $newTargetUri = 'product/A';
-        $newAbsoluteTargetUri = 'https://www.example.org/' . $newTargetUri;
+        $newAbsoluteTargetUri = "https://$sourceHost/$newTargetUri";
 
         $this->redirectStorage->addRedirect($sourcePath, $oldTargetUri);
         $this->redirectRepository->persistEntities();
@@ -79,9 +80,29 @@ class RedirectStorageTests extends FunctionalTestCase
 
         $this->assertSame($oldTargetUri, $absoluteRedirect->getTargetUriPath());
 
-        $this->redirectStorage->addRedirect('productA', $newTargetUri, null, ['www.example.org']);
+        $this->redirectStorage->addRedirect('productA', $newTargetUri, null, [$sourceHost]);
 
         $absoluteRedirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourcePath);
         $this->assertSame($newAbsoluteTargetUri, $absoluteRedirect->getTargetUriPath());
+    }
+
+    /**
+     * @test
+     */
+    public function addRedirectDoesNotModifyRedirectsWithSimilarHost()
+    {
+        $sourceHost = 'example.org';
+        $sourcePath = 'some/old/product';
+        $oldTargetUri = "https://www.$sourceHost/productA";
+        $newTargetUri = 'product/A';
+
+        $this->redirectStorage->addRedirect($sourcePath, $oldTargetUri);
+        $this->redirectRepository->persistEntities();
+
+        $this->redirectStorage->addRedirect('productA', $newTargetUri, null, [$sourceHost]);
+
+        $absoluteRedirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourcePath);
+
+        $this->assertSame($oldTargetUri, $absoluteRedirect->getTargetUriPath());
     }
 }
