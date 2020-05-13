@@ -50,6 +50,7 @@ jobs:
 
     - name: Run Unit tests
       run: | 
+        cd ${GITHUB_WORKSPACE}/${FLOW_FOLDER}
         pwd
         bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/UnitTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
       
