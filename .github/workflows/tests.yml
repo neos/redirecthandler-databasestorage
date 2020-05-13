@@ -36,7 +36,6 @@ jobs:
 
     - name: Prepare Flow distribution
       run: |
-        pwd
         git clone https://github.com/neos/flow-base-distribution.git -b ${FLOW_TARGET_VERSION} ${FLOW_FOLDER}
         cd ${FLOW_FOLDER} 
         composer require --no-update --no-interaction neos/redirecthandler:4.0.x-dev
@@ -51,14 +50,8 @@ jobs:
 
     - name: Run Unit tests
       run: | 
-        cd ${FLOW_FOLDER} 
         pwd
-        ls bin
-        ls Build/BuildEssentials/PhpUnit/UnitTests.xml
-        ls Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
         bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/UnitTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
       
     - name: Run Functional tests
-      run: |
-        cd ${FLOW_FOLDER} 
-        bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Functional
+      run: bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Functional
