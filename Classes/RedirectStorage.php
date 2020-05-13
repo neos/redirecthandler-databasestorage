@@ -270,14 +270,25 @@ class RedirectStorage implements RedirectStorageInterface
             $this->routerCachingService->flushCachesForUriPath($existingRedirectForTargetUriPath->getSourceUriPath());
         }
 
+        $absoluteUriPattern = '/^https?:\/\//i';
+        $newTargetIsAbsolute = preg_match($absoluteUriPattern, $newRedirect->getTargetUriPath()) === 1;
+
         $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(),
             $newRedirect->getHost());
         /** @var $obsoleteRedirect Redirect */
         foreach ($obsoleteRedirectInstances as $obsoleteRedirect) {
+            // Remove duplicates of the newly added redirect
             if ($obsoleteRedirect->getSourceUriPath() === $newRedirect->getTargetUriPath()) {
                 $this->redirectRepository->remove($obsoleteRedirect);
             } else {
-                $obsoleteRedirect->setTargetUriPath($newRedirect->getTargetUriPath());
+                // Rebuild the target uri of the existing redirect if it was absolute and would
+                // be overridden by a relative target uri of the newly added redirect.
+                if (!$newTargetIsAbsolute && preg_match($absoluteUriPattern, $obsoleteRedirect->getTargetUriPath()) === 1) {
+                    $modifiedTargetUri = str_replace($newRedirect->getSourceUriPath(), $newRedirect->getTargetUriPath(), $obsoleteRedirect->getTargetUriPath());
+                    $obsoleteRedirect->setTargetUriPath($modifiedTargetUri);
+                } else {
+                    $obsoleteRedirect->setTargetUriPath($newRedirect->getTargetUriPath());
+                }
                 $this->redirectRepository->update($obsoleteRedirect);
                 $updatedRedirects[]= $obsoleteRedirect;
             }
