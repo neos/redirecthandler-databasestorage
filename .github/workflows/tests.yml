@@ -46,13 +46,14 @@ jobs:
         cd ${FLOW_FOLDER} 
         composer install --no-interaction --no-progress
         rm -rf Packages/Application/Neos.RedirectHandler.DatabaseStorage
-        mv ../redirecthandler-databasestorage Packages/Application/Neos.RedirectHandler.DatabaseStorage
-        
-    - name: Verify
-      run: pwd
+        cp -r ../redirecthandler-databasestorage Packages/Application/Neos.RedirectHandler.DatabaseStorage
 
     - name: Run Unit tests
-      run: bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/UnitTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
+      run: | 
+        cd ${FLOW_FOLDER} 
+        bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/UnitTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
       
     - name: Run Functional tests
-      run: bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Functional
+      run: |
+        cd ${FLOW_FOLDER} 
+        bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Functional
