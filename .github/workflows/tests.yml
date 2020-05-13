@@ -10,6 +10,7 @@ jobs:
   build:
     env:     
       FLOW_TARGET_VERSION: 6.2
+      FLOW_CONTEXT: Testing
       FLOW_FOLDER: ../flow-base-distribution
 
     runs-on: ubuntu-latest
