@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Prepare Flow distribution
-    - run: cd ..
+      run: cd ..
     - run: git clone https://github.com/neos/flow-base-distribution.git -b ${FLOW_TARGET_VERSION}
       env:     
         FLOW_TARGET_VERSION: 6.2
