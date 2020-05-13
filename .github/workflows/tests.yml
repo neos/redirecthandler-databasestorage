@@ -17,6 +17,23 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Update Composer
+      run: |
+        sudo composer self-update
+        composer --version
+        
+    # Directory permissions for .composer are wrong, so we remove the complete directory
+    # https://github.com/actions/virtual-environments/issues/824
+    - name: Delete .composer directory
+      run: |
+        sudo rm -rf ~/.composer
+
+    - name: Cache dependencies
+      uses: actions/cache@v1
+      with:
+        path: ~/.composer/cache
+        key: dependencies-composer-${{ hashFiles('composer.json') }}
+
     - name: Prepare Flow distribution
       run: |
         pwd
@@ -25,15 +42,23 @@ jobs:
         composer require --no-update --no-interaction neos/redirecthandler:4.0.x-dev
         composer require --no-update --no-interaction neos/redirecthandler-databasestorage:dev-master
 
-    - name: Install packages
+    - name: Install distribution
       run: |
         cd ${FLOW_FOLDER} 
-        composer install --no-interaction
+        composer install --no-interaction --no-progress
         rm -rf Packages/Application/Neos.RedirectHandler.DatabaseStorage
         mv ../redirecthandler-databasestorage Packages/Application/Neos.RedirectHandler.DatabaseStorage
 
     - name: Run Unit tests
-      run: cd ${FLOW_FOLDER} && bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/UnitTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
+      run: | 
+        cd ${FLOW_FOLDER} 
+        pwd
+        ls bin
+        ls Build/BuildEssentials/PhpUnit/UnitTests.xml
+        ls Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
+        bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/UnitTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Unit
       
     - name: Run Functional tests
-      run: cd ${FLOW_FOLDER} && bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Functional/*
+      run: |
+        cd ${FLOW_FOLDER} 
+        bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Neos.RedirectHandler.DatabaseStorage/Tests/Functional
