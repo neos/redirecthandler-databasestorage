@@ -49,7 +49,7 @@ class RedirectStorageTest extends UnitTestCase
     /**
      * Sets up this test case
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -95,7 +95,19 @@ class RedirectStorageTest extends UnitTestCase
     {
         $mockRedirect = $this->getMockBuilder(Redirect::class)
             ->disableOriginalConstructor()
+            ->onlyMethods([
+                'getSourceUriPath',
+                'getTargetUriPath',
+                'getStatusCode',
+                'getCreationDateTime',
+                'getLastModificationDateTime',
+                'getType',
+                'getHitCounter',
+            ])
             ->getMock();
+
+        $mockRedirect->method('getCreationDateTime')->willReturn(new \DateTime());
+        $mockRedirect->method('getLastModificationDateTime')->willReturn(new \DateTime());
 
         $mockRedirect
             ->expects($this->once())
@@ -193,6 +205,6 @@ class RedirectStorageTest extends UnitTestCase
             ->expects($this->atLeastOnce())
             ->method('emitRedirectCreated');
 
-        $this->redirectStorage->addRedirect('some/relative/path', 'target');
+        $this->redirectStorage->addRedirect('some/relative/path', 'target', 301);
     }
 }
