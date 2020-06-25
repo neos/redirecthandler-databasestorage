@@ -15,9 +15,8 @@ use Neos\Flow\Tests\FunctionalTestCase;
 use Neos\RedirectHandler\DatabaseStorage\Domain\Repository\RedirectRepository;
 use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 
-
 /**
- * Functional tests for the RedirectService and dependant classes
+ * Functional tests for the RedirectRepository and dependant classes
  */
 class RedirectRepositoryTest extends FunctionalTestCase
 {
