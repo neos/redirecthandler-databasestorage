@@ -10,7 +10,7 @@ class Version20190715130625 extends AbstractMigration
     /**
      * @return string
      */
-    public function getDescription()
+    public function getDescription(): string 
     {
         return 'Adds additional meta fields for giving a redirect more context';
     }
@@ -19,7 +19,7 @@ class Version20190715130625 extends AbstractMigration
      * @param Schema $schema
      * @return void
      */
-    public function up(Schema $schema)
+    public function up(Schema $schema): void 
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'postgresql', 'Migration can only be executed safely on "postgresql".');
 
@@ -34,7 +34,7 @@ class Version20190715130625 extends AbstractMigration
      * @param Schema $schema
      * @return void
      */
-    public function down(Schema $schema)
+    public function down(Schema $schema): void 
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'postgresql', 'Migration can only be executed safely on "postgresql".');
         $this->addSql('ALTER TABLE neos_redirecthandler_databasestorage_domain_model_redirect DROP creator');
