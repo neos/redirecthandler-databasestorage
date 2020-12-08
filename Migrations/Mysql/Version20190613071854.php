@@ -10,7 +10,7 @@ class Version20190613071854 extends AbstractMigration
     /**
      * @return string
      */
-    public function getDescription()
+    public function getDescription(): string 
     {
         return 'Adds additional meta fields for giving a redirect more context';
     }
@@ -19,7 +19,7 @@ class Version20190613071854 extends AbstractMigration
      * @param Schema $schema
      * @return void
      */
-    public function up(Schema $schema)
+    public function up(Schema $schema): void 
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on "mysql".');
 
@@ -30,7 +30,7 @@ class Version20190613071854 extends AbstractMigration
      * @param Schema $schema
      * @return void
      */
-    public function down(Schema $schema)
+    public function down(Schema $schema): void 
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on "mysql".');
 
