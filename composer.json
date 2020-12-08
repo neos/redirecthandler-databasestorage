@@ -4,8 +4,8 @@
     "description": "A plugin for neos/redirecthandler to store redirects in the database",
     "license": "MIT",
     "require": {
-        "neos/redirecthandler": "~3.0 || ~4.0 || dev-master",
-        "neos/flow": "~5.0 || ~6.0 || dev-master"
+        "neos/redirecthandler": "~5.0 || dev-master",
+        "neos/flow": "~7.0 || dev-master"
     },
     "provide": {
         "neos/redirecthandler-storageimplementation": "3.0"
@@ -17,7 +17,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "4.0.x-dev"
+            "dev-master": "5.0.x-dev"
         },
         "applied-flow-migrations": [
             "TYPO3.FLOW3-201209201112",
