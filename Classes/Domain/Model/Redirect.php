@@ -27,7 +27,6 @@ use Neos\Flow\Utility\Now;
  * @Flow\Entity
  * @ORM\Table(
  *    indexes={
- * 		@ORM\Index(name="sourceuripathhash",columns={"sourceuripathhash","host"}),
  * 		@ORM\Index(name="targeturipathhash",columns={"targeturipathhash","host"})
  *    }
  * )
