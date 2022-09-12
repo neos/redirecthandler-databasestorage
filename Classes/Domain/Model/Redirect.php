@@ -176,8 +176,7 @@ class Redirect implements RedirectInterface
         $this->host = $host ? trim($host) : null;
         $this->creator = $creator;
         $this->comment = $comment;
-        $this->type = in_array($type,
-                [self::REDIRECT_TYPE_GENERATED, self::REDIRECT_TYPE_MANUAL]) ? $type : self::REDIRECT_TYPE_GENERATED;
+        $this->type = in_array($type, [self::REDIRECT_TYPE_GENERATED, self::REDIRECT_TYPE_MANUAL]) ? $type : self::REDIRECT_TYPE_GENERATED;
         $this->startDateTime = $startDateTime;
         $this->endDateTime = $endDateTime;
 
