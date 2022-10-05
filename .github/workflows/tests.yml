@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     env:     
-      FLOW_TARGET_VERSION: 7.0
+      FLOW_TARGET_VERSION: "7.0"
       FLOW_CONTEXT: Testing
       FLOW_FOLDER: ../flow-base-distribution
 
