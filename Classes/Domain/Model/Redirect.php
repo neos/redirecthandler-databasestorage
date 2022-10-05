@@ -27,7 +27,6 @@ use Neos\Flow\Utility\Now;
  * @Flow\Entity
  * @ORM\Table(
  *    indexes={
- * 		@ORM\Index(name="sourceuripathhash",columns={"sourceuripathhash","host"}),
  * 		@ORM\Index(name="targeturipathhash",columns={"targeturipathhash","host"})
  *    }
  * )
@@ -177,8 +176,7 @@ class Redirect implements RedirectInterface
         $this->host = $host ? trim($host) : null;
         $this->creator = $creator;
         $this->comment = $comment;
-        $this->type = in_array($type,
-                [self::REDIRECT_TYPE_GENERATED, self::REDIRECT_TYPE_MANUAL]) ? $type : self::REDIRECT_TYPE_GENERATED;
+        $this->type = in_array($type, [self::REDIRECT_TYPE_GENERATED, self::REDIRECT_TYPE_MANUAL]) ? $type : self::REDIRECT_TYPE_GENERATED;
         $this->startDateTime = $startDateTime;
         $this->endDateTime = $endDateTime;
 
