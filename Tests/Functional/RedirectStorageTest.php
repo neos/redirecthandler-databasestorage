@@ -164,5 +164,4 @@ class RedirectStorageTest extends FunctionalTestCase
         $this->assertSame($newAbsoluteTargetUri, $absoluteRedirect->getTargetUriPath());
         $this->assertSame($newAbsoluteStatusCode, $absoluteRedirect->getStatusCode());
     }
-
 }
