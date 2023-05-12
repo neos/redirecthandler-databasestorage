@@ -1,4 +1,5 @@
 <?php
+
 namespace Neos\RedirectHandler\DatabaseStorage\Tests\Functional;
 
 /*
@@ -18,7 +19,7 @@ use Neos\RedirectHandler\Storage\RedirectStorageInterface;
 /**
  * Functional tests for the RedirectService and dependant classes
  */
-class RedirectStorageTests extends FunctionalTestCase
+class RedirectStorageTest extends FunctionalTestCase
 {
     /**
      * @var boolean
