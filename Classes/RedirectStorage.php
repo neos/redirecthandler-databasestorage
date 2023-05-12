@@ -150,7 +150,7 @@ class RedirectStorage implements RedirectStorageInterface
         ?string $comment = null,
         ?string $type = null,
         DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        DateTime $endDateTime = null,
     ): array {
         $statusCode = $statusCode ?: (int)$this->defaultStatusCode['redirect'];
         $redirects = [];
@@ -175,7 +175,8 @@ class RedirectStorage implements RedirectStorageInterface
                     $comment,
                     $type,
                     $startDateTime,
-                    $endDateTime));
+                    $endDateTime
+                ));
             }, $hosts);
         } else {
             $redirects = array_merge($redirects, $this->addRedirectByHost(
@@ -187,7 +188,8 @@ class RedirectStorage implements RedirectStorageInterface
                 $comment,
                 $type,
                 $startDateTime,
-                $endDateTime));
+                $endDateTime
+            ));
         }
         $this->emitRedirectCreated($redirects);
 
@@ -220,7 +222,7 @@ class RedirectStorage implements RedirectStorageInterface
         $comment = null,
         $type = null,
         DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        DateTime $endDateTime = null,
     ): array {
         if ($startDateTime instanceof \DateTime) {
             $startDateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
@@ -229,8 +231,7 @@ class RedirectStorage implements RedirectStorageInterface
             $endDateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
         }
 
-        $redirect = new Redirect($sourceUriPath, $targetUriPath, $statusCode, $host, $creator, $comment, $type,
-            $startDateTime, $endDateTime);
+        $redirect = new Redirect($sourceUriPath, $targetUriPath, $statusCode, $host, $creator, $comment, $type, $startDateTime, $endDateTime);
         $updatedRedirects = $this->updateDependingRedirects($redirect);
         $this->persistenceManager->persistAll();
         $this->redirectRepository->add($redirect);
@@ -253,8 +254,7 @@ class RedirectStorage implements RedirectStorageInterface
         $updatedRedirects = [];
 
         /** @var $existingRedirectForSourceUriPath Redirect */
-        $existingRedirectForSourceUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getSourceUriPath(),
-            $newRedirect->getHost(), false);
+        $existingRedirectForSourceUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost(), false);
         if ($existingRedirectForSourceUriPath !== null) {
             $this->removeAndLog($existingRedirectForSourceUriPath,
                 sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath()));
@@ -262,8 +262,7 @@ class RedirectStorage implements RedirectStorageInterface
         }
 
         /** @var $existingRedirectForTargetUriPath Redirect */
-        $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(),
-            $newRedirect->getHost(), false);
+        $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost($newRedirect->getTargetUriPath(), $newRedirect->getHost(), false);
         if ($existingRedirectForTargetUriPath !== null) {
             $this->removeAndLog($existingRedirectForTargetUriPath,
                 sprintf('Existing redirect for the target URI path "%s" removed.', $newRedirect->getTargetUriPath()));
@@ -273,8 +272,7 @@ class RedirectStorage implements RedirectStorageInterface
         $absoluteUriPattern = '/^https?:\/\//i';
         $newTargetIsAbsolute = preg_match($absoluteUriPattern, $newRedirect->getTargetUriPath()) === 1;
 
-        $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(),
-            $newRedirect->getHost());
+        $obsoleteRedirectInstances = $this->redirectRepository->findByTargetUriPathAndHost($newRedirect->getSourceUriPath(), $newRedirect->getHost());
         /** @var $obsoleteRedirect Redirect */
         foreach ($obsoleteRedirectInstances as $obsoleteRedirect) {
             // Remove duplicates of the newly added redirect
@@ -292,7 +290,7 @@ class RedirectStorage implements RedirectStorageInterface
                     $obsoleteRedirect->setStatusCode($newRedirect->getStatusCode());
                 }
                 $this->redirectRepository->update($obsoleteRedirect);
-                $updatedRedirects[]= $obsoleteRedirect;
+                $updatedRedirects[] = $obsoleteRedirect;
             }
         }
         return $updatedRedirects;
