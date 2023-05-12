@@ -106,4 +106,63 @@ class RedirectStorageTest extends FunctionalTestCase
 
         $this->assertSame($oldTargetUri, $absoluteRedirect->getTargetUriPath());
     }
+
+    /**
+     * @test
+     */
+    public function updateStatusCodeIfObsoleteRedirectGotUpdated()
+    {
+        $sourcePath = 'some/old/product';
+
+        $oldTargetUri = 'productB';
+        $oldStatusCode = 301;
+
+        $newTargetUri = '';
+        $newStatusCode = 410;
+
+        $this->redirectStorage->addRedirect($sourcePath, $oldTargetUri, $oldStatusCode);
+        $this->redirectRepository->persistEntities();
+
+        $this->redirectStorage->addRedirect($oldTargetUri, $newTargetUri, $newStatusCode);
+
+        $relativeRedirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourcePath);
+        $this->assertSame($newTargetUri, $relativeRedirect->getTargetUriPath());
+        $this->assertSame($newStatusCode, $relativeRedirect->getStatusCode());
+    }
+
+    /**
+     * @test
+     */
+    public function updateStatusCodeIfObsoleteRedirectWithAbsoluteUriGotUpdated()
+    {
+        $sourceHost = 'www.example.org';
+        $sourcePath = 'some/old/product';
+
+        $oldTargetUri = "https://$sourceHost/productA";
+        $oldStatusCode = 301;
+
+        $newTargetUri = 'product/A';
+
+        $newAbsoluteTargetUri = "https://$sourceHost/$newTargetUri";
+        $newAbsoluteStatusCode = 399;
+
+        $this->redirectStorage->addRedirect($sourcePath, $oldTargetUri, $oldStatusCode);
+        $this->redirectRepository->persistEntities();
+
+        $this->redirectStorage->addRedirect('productA', $newTargetUri);
+        $this->redirectRepository->persistEntities();
+
+        $absoluteRedirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourcePath);
+
+        $this->assertSame($oldTargetUri, $absoluteRedirect->getTargetUriPath());
+        $this->assertSame($oldStatusCode, $absoluteRedirect->getStatusCode());
+
+        $this->redirectStorage->addRedirect('productA', $newTargetUri, $newAbsoluteStatusCode, [$sourceHost]);
+        $this->redirectRepository->persistEntities();
+
+        $absoluteRedirect = $this->redirectStorage->getOneBySourceUriPathAndHost($sourcePath);
+        $this->assertSame($newAbsoluteTargetUri, $absoluteRedirect->getTargetUriPath());
+        $this->assertSame($newAbsoluteStatusCode, $absoluteRedirect->getStatusCode());
+    }
+
 }

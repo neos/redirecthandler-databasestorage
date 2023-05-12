@@ -283,11 +283,11 @@ class RedirectStorage implements RedirectStorageInterface
                 if (!$newTargetIsAbsolute && preg_match($absoluteUriPattern, $obsoleteRedirect->getTargetUriPath()) === 1) {
                     $modifiedTargetUri = str_replace($newRedirect->getSourceUriPath(), $newRedirect->getTargetUriPath(), $obsoleteRedirect->getTargetUriPath());
                     $obsoleteRedirect->setTargetUriPath($modifiedTargetUri);
-                    $obsoleteRedirect->setStatusCode($newRedirect->getStatusCode());
                 } else {
                     $obsoleteRedirect->setTargetUriPath($newRedirect->getTargetUriPath());
-                    $obsoleteRedirect->setStatusCode($newRedirect->getStatusCode());
                 }
+                $obsoleteRedirect->setStatusCode($newRedirect->getStatusCode());
+
                 $this->redirectRepository->update($obsoleteRedirect);
                 $updatedRedirects[] = $obsoleteRedirect;
             }
