@@ -4,8 +4,9 @@
     "description": "A plugin for neos/redirecthandler to store redirects in the database",
     "license": "MIT",
     "require": {
-        "neos/redirecthandler": "~5.0 || dev-master",
-        "neos/flow": "~7.0 || ~8.0 || dev-master"
+        "php": ">=8.2",
+        "neos/redirecthandler": "~6.0 || dev-master",
+        "neos/flow": "~9.0 || dev-master"
     },
     "provide": {
         "neos/redirecthandler-storageimplementation": "3.0"
