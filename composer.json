@@ -5,7 +5,7 @@
     "license": "MIT",
     "require": {
         "php": ">=8.2",
-        "neos/redirecthandler": "~6.0 || dev-master",
+        "neos/redirecthandler": "~6.0 || dev-main",
         "neos/flow": "~9.0 || dev-master"
     },
     "provide": {
