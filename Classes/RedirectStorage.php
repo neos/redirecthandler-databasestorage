@@ -234,7 +234,8 @@ class RedirectStorage implements RedirectStorageInterface
         $redirect = new Redirect(
             $sourceUriPath,
             $targetUriPath,
-            $statusCode, $host,
+            $statusCode,
+            $host,
             $creator,
             $comment,
             $type,
@@ -269,8 +270,10 @@ class RedirectStorage implements RedirectStorageInterface
             false
         );
         if ($existingRedirectForSourceUriPath !== null) {
-            $this->removeAndLog($existingRedirectForSourceUriPath,
-                sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath()));
+            $this->removeAndLog(
+                $existingRedirectForSourceUriPath,
+                sprintf('Existing redirect for the source URI path "%s" removed.', $newRedirect->getSourceUriPath())
+            );
             $this->routerCachingService->flushCachesForUriPath($existingRedirectForSourceUriPath->getSourceUriPath());
         }
 
