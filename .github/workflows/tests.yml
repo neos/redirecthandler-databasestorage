@@ -2,14 +2,14 @@ name: Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main  ]
   pull_request:
     branches: [ main ]
 
 jobs:
   build:
     env:     
-      FLOW_TARGET_VERSION: "7.0"
+      FLOW_TARGET_VERSION: "9.0"
       FLOW_CONTEXT: Testing
       FLOW_FOLDER: ../flow-base-distribution
 
@@ -17,6 +17,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: "8.2"
+        extensions: mbstring, xml, json, zlib, iconv, intl, pdo_sqlite, mysql
+        coverage: xdebug #optional
+        ini-values: opcache.fast_shutdown=0
 
     - name: Update Composer
       run: |
