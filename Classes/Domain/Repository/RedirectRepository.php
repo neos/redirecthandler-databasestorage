@@ -109,8 +109,8 @@ class RedirectRepository extends Repository
             $query = $this->entityManager->createQuery(
                 'SELECT r FROM Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect r
                 WHERE (r.targetUriPathHash = :targetUriPathHash AND r.host = :host)
-                OR (r.targetUriPath LIKE :hostAndTargetUri)
-            ');
+                OR (r.targetUriPath LIKE :hostAndTargetUri)'
+            );
             $query->setParameter('targetUriPathHash', md5(trim($targetUriPath, '/')));
             $query->setParameter('hostAndTargetUri', '%/' . $host . '/' . $targetUriPath);
             $query->setParameter('host', $host);
