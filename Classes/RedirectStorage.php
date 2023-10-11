@@ -150,7 +150,7 @@ class RedirectStorage implements RedirectStorageInterface
         ?string $comment = null,
         ?string $type = null,
         DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        DateTime $endDateTime = null,
     ): array {
         $statusCode = $statusCode ?: (int)$this->defaultStatusCode['redirect'];
         $redirects = [];
@@ -222,7 +222,7 @@ class RedirectStorage implements RedirectStorageInterface
         $comment = null,
         $type = null,
         DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        DateTime $endDateTime = null,
     ): array {
         if ($startDateTime instanceof \DateTime) {
             $startDateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
@@ -240,7 +240,7 @@ class RedirectStorage implements RedirectStorageInterface
             $comment,
             $type,
             $startDateTime,
-            $endDateTime
+            $endDateTime,
         );
         $updatedRedirects = $this->updateDependingRedirects($redirect);
         $this->persistenceManager->persistAll();
@@ -267,7 +267,7 @@ class RedirectStorage implements RedirectStorageInterface
         $existingRedirectForSourceUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost(
             $newRedirect->getSourceUriPath(),
             $newRedirect->getHost(),
-            false
+            false,
         );
         if ($existingRedirectForSourceUriPath !== null) {
             $this->removeAndLog(
@@ -281,7 +281,7 @@ class RedirectStorage implements RedirectStorageInterface
         $existingRedirectForTargetUriPath = $this->redirectRepository->findOneBySourceUriPathAndHost(
             $newRedirect->getTargetUriPath(),
             $newRedirect->getHost(),
-            false
+            false,
         );
         if ($existingRedirectForTargetUriPath !== null) {
             $this->removeAndLog(
@@ -312,6 +312,8 @@ class RedirectStorage implements RedirectStorageInterface
                 } else {
                     $obsoleteRedirect->setTargetUriPath($newRedirect->getTargetUriPath());
                 }
+                $obsoleteRedirect->setStatusCode($newRedirect->getStatusCode());
+
                 $this->redirectRepository->update($obsoleteRedirect);
                 $updatedRedirects[] = $obsoleteRedirect;
             }
