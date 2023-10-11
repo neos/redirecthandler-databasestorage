@@ -21,7 +21,10 @@ final class Version20220912100052 extends AbstractMigration
             "Migration can only be executed safely on '\Doctrine\DBAL\Platforms\MySqlPlatform'."
         );
 
-        $this->addSql('DROP INDEX sourceuripathhash ON neos_redirecthandler_databasestorage_domain_model_redirect');
+        $indexes = $this->sm->listTableIndexes('neos_redirecthandler_databasestorage_domain_model_redirect');
+        if (array_key_exists('sourceuripathhash', $indexes)) {
+            $this->addSql('DROP INDEX sourceuripathhash ON neos_redirecthandler_databasestorage_domain_model_redirect');
+        }
     }
 
     public function down(Schema $schema): void
