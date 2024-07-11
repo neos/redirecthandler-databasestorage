@@ -17,12 +17,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
-use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
-use Neos\RedirectHandler\RedirectInterface;
-use Neos\RedirectHandler\Redirect as RedirectDto;
+use Doctrine\ORM\UnitOfWork;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Flow\Persistence\Repository;
+use Neos\RedirectHandler\DatabaseStorage\Domain\Model\Redirect;
+use Neos\RedirectHandler\Redirect as RedirectDto;
+use Neos\RedirectHandler\RedirectInterface;
 
 /**
  * Repository for redirect instances.
@@ -280,7 +281,10 @@ class RedirectRepository extends Repository
         foreach ($this->entityManager->getUnitOfWork()->getIdentityMap() as $className => $entities) {
             if ($className === $this->entityClassName) {
                 foreach ($entities as $entityToPersist) {
-                    $this->entityManager->flush($entityToPersist);
+                    $state = $this->entityManager->getUnitOfWork()->getEntityState($entityToPersist);
+                    if ($state === UnitOfWork::STATE_MANAGED || $state === UnitOfWork::STATE_REMOVED) {
+                        $this->entityManager->flush($entityToPersist);
+                    }
                 }
                 $this->emitRepositoryObjectsPersisted();
                 break;
