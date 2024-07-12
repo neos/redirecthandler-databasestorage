@@ -23,6 +23,9 @@ jobs:
       run: echo "PACKAGE_TARGET_VERSION=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
       working-directory: .
 
+    - name: Set alias branch name
+      run: if [ "${PACKAGE_TARGET_VERSION}" == "main" ]; then echo "PACKAGE_BRANCH_ALIAS=dev-main"; else echo "PACKAGE_BRANCH_ALIAS=${PACKAGE_TARGET_VERSION}.x-dev"; fi >> $GITHUB_ENV
+
     - name: Update Composer
       run: |
         sudo composer self-update
@@ -47,7 +50,7 @@ jobs:
         
         git -C ../${{ env.PACKAGE_FOLDER }} checkout -b build
         composer config repositories.package '{ "type": "path", "url": "../${{ env.PACKAGE_FOLDER }}", "options": { "symlink": false } }'
-        composer require --no-update --no-interaction neos/redirecthandler-databasestorage:"dev-build as ${PACKAGE_TARGET_VERSION}.x-dev"
+        composer require --no-update --no-interaction neos/redirecthandler-databasestorage:"dev-build as ${PACKAGE_BRANCH_ALIAS}"
 
     - name: Install distribution
       run: |
