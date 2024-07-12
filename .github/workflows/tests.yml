@@ -43,7 +43,7 @@ jobs:
       run: |
         git clone https://github.com/neos/flow-base-distribution.git -b "${FLOW_TARGET_VERSION}" "${FLOW_FOLDER}"
         cd ${FLOW_FOLDER} 
-        composer require --no-update --no-interaction neos/redirecthandler-databasestorage:"dev-build as dev-${PACKAGE_TARGET_VERSION}"
+        composer require --no-update --no-interaction neos/redirecthandler-databasestorage:"dev-build as dev-${PACKAGE_TARGET_VERSION}.x-dev"
 
     - name: Install distribution
       run: |
