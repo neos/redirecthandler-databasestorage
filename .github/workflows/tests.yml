@@ -18,6 +18,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set package branch name
+      run: echo "PACKAGE_TARGET_VERSION=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+      working-directory: .
+
     - name: Update Composer
       run: |
         sudo composer self-update
