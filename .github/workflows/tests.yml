@@ -43,10 +43,9 @@ jobs:
       run: |
         git clone https://github.com/neos/flow-base-distribution.git -b "${FLOW_TARGET_VERSION}" "${FLOW_FOLDER}"
         cd ${FLOW_FOLDER} 
-        ls -la
-        ls -la ..
+        
         git -C ../redirecthandler-databasestorage checkout -b build
-        composer config repositories.package '{ "type": "path", "url": "../${{ env.PACKAGE_FOLDER }}", "options": { "symlink": false } }'
+        composer config repositories.package '{ "type": "path", "url": "../redirecthandler-databasestorage", "options": { "symlink": false } }'
         composer require --no-update --no-interaction neos/redirecthandler-databasestorage:"dev-build as ${PACKAGE_TARGET_VERSION}.x-dev"
 
     - name: Install distribution
