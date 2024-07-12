@@ -49,11 +49,11 @@ jobs:
       run: |
         sudo rm -rf ~/.composer
 
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.composer/cache
-        key: dependencies-composer-${{ hashFiles('composer.json') }}
+#    - name: Cache dependencies
+#      uses: actions/cache@v3
+#      with:
+#        path: ~/.composer/cache
+#        key: dependencies-composer-${{ hashFiles('composer.json') }}
 
     - name: Prepare Flow distribution
       run: |
@@ -67,7 +67,7 @@ jobs:
     - name: Install distribution
       run: |
         cd ${FLOW_FOLDER}
-        composer install --no-interaction --no-progress
+        composer install --no-cache --no-interaction --no-progress
 
     - name: Run Unit tests
       run: | 
