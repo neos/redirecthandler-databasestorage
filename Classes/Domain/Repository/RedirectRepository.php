@@ -17,7 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Internal\Hydration\IterableResult;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\UnitOfWork;
+use InvalidArgumentException;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\QueryInterface;
 use Neos\Flow\Persistence\Repository;
@@ -281,9 +281,10 @@ class RedirectRepository extends Repository
         foreach ($this->entityManager->getUnitOfWork()->getIdentityMap() as $className => $entities) {
             if ($className === $this->entityClassName) {
                 foreach ($entities as $entityToPersist) {
-                    $state = $this->entityManager->getUnitOfWork()->getEntityState($entityToPersist);
-                    if ($state === UnitOfWork::STATE_MANAGED || $state === UnitOfWork::STATE_REMOVED) {
+                    try {
                         $this->entityManager->flush($entityToPersist);
+                    } catch (InvalidArgumentException) {
+                        // Do nothing here, as we assume just changes to the state of the entities in the identity map
                     }
                 }
                 $this->emitRepositoryObjectsPersisted();
