@@ -12,11 +12,14 @@ jobs:
       FLOW_TARGET_VERSION: "8.3"
       FLOW_CONTEXT: Testing
       FLOW_FOLDER: ../flow-base-distribution
+      PACKAGE_FOLDER: redirect-databasestorage
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        path: ${{ env.PACKAGE_FOLDER }}
 
     - name: Set package branch name
       run: echo "PACKAGE_TARGET_VERSION=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
@@ -43,6 +46,9 @@ jobs:
       run: |
         git clone https://github.com/neos/flow-base-distribution.git -b "${FLOW_TARGET_VERSION}" "${FLOW_FOLDER}"
         cd ${FLOW_FOLDER} 
+        
+        git -C ../${{ env.PACKAGE_FOLDER }} checkout -b build
+        composer config repositories.package '{ "type": "path", "url": "../${{ env.PACKAGE_FOLDER }}", "options": { "symlink": false } }'
         composer require --no-update --no-interaction neos/redirecthandler-databasestorage:"dev-build as ${PACKAGE_TARGET_VERSION}.x-dev"
 
     - name: Install distribution
