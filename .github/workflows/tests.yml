@@ -14,6 +14,10 @@ jobs:
       FLOW_FOLDER: ../flow-base-distribution
       PACKAGE_FOLDER: redirecthandler-databasestorage
 
+    strategy:
+      matrix:
+        php-versions: ['8.2', '8.3']
+
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +29,14 @@ jobs:
 
     - name: Set alias branch name
       run: if [ "${PACKAGE_TARGET_VERSION}" == "main" ]; then echo "PACKAGE_BRANCH_ALIAS=dev-main"; else echo "PACKAGE_BRANCH_ALIAS=${PACKAGE_TARGET_VERSION}.x-dev"; fi >> $GITHUB_ENV
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+        extensions: mbstring, xml, json, zlib, iconv, intl, pdo_sqlite, mysql
+        coverage: xdebug #optional
+        ini-values: opcache.fast_shutdown=0
 
     - name: Update Composer
       run: |
