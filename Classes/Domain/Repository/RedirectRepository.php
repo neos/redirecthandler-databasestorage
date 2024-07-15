@@ -283,7 +283,7 @@ class RedirectRepository extends Repository
                 foreach ($entities as $entityToPersist) {
                     try {
                         $this->entityManager->flush($entityToPersist);
-                    } catch (InvalidArgumentException) {
+                    } catch (InvalidArgumentException $e) {
                         // Do nothing here, as we assume just changes to the state of the entities in the identity map
                     }
                 }
