@@ -4,19 +4,39 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, '[0-9]+.[0-9]' ]
 
 jobs:
   build:
     env:     
-      FLOW_TARGET_VERSION: "7.0"
+      FLOW_TARGET_VERSION: "9.0"
       FLOW_CONTEXT: Testing
       FLOW_FOLDER: ../flow-base-distribution
+      PACKAGE_FOLDER: redirecthandler-databasestorage
+
+    strategy:
+      matrix:
+        php-versions: ['8.2', '8.3']
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set package branch name
+      run: echo "PACKAGE_TARGET_VERSION=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
+      working-directory: .
+
+    - name: Set alias branch name
+      run: if [ "${PACKAGE_TARGET_VERSION}" == "main" ]; then echo "PACKAGE_BRANCH_ALIAS=dev-main"; else echo "PACKAGE_BRANCH_ALIAS=${PACKAGE_TARGET_VERSION}.x-dev"; fi >> $GITHUB_ENV
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+        extensions: mbstring, xml, json, zlib, iconv, intl, pdo_sqlite, mysql
+        coverage: xdebug #optional
+        ini-values: opcache.fast_shutdown=0
 
     - name: Update Composer
       run: |
@@ -39,14 +59,15 @@ jobs:
       run: |
         git clone https://github.com/neos/flow-base-distribution.git -b "${FLOW_TARGET_VERSION}" "${FLOW_FOLDER}"
         cd ${FLOW_FOLDER} 
-        composer require --no-update --no-interaction neos/redirecthandler-databasestorage:dev-main
+        
+        git -C ../${{ env.PACKAGE_FOLDER }} checkout -b build
+        composer config repositories.package '{ "type": "path", "url": "../${{ env.PACKAGE_FOLDER }}", "options": { "symlink": false } }'
+        composer require --no-update --no-interaction neos/redirecthandler-databasestorage:"dev-build as ${PACKAGE_BRANCH_ALIAS}"
 
     - name: Install distribution
       run: |
-        cd ${FLOW_FOLDER} 
+        cd ${FLOW_FOLDER}
         composer install --no-interaction --no-progress
-        rm -rf Packages/Application/Neos.RedirectHandler.DatabaseStorage
-        cp -r ../redirecthandler-databasestorage Packages/Application/Neos.RedirectHandler.DatabaseStorage
 
     - name: Run Unit tests
       run: | 
