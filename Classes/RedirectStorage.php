@@ -144,13 +144,13 @@ class RedirectStorage implements RedirectStorageInterface
     public function addRedirect(
         string $sourceUriPath,
         string $targetUriPath,
-        int $statusCode = null,
+        ?int $statusCode = null,
         array $hosts = [],
         ?string $creator = null,
         ?string $comment = null,
         ?string $type = null,
-        DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        ?DateTime $startDateTime = null,
+        ?DateTime $endDateTime = null
     ): array {
         $statusCode = $statusCode ?: (int)$this->defaultStatusCode['redirect'];
         $redirects = [];
@@ -221,8 +221,8 @@ class RedirectStorage implements RedirectStorageInterface
         $creator = null,
         $comment = null,
         $type = null,
-        DateTime $startDateTime = null,
-        DateTime $endDateTime = null
+        ?DateTime $startDateTime = null,
+        ?DateTime $endDateTime = null
     ): array {
         if ($startDateTime instanceof \DateTime) {
             $startDateTime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
