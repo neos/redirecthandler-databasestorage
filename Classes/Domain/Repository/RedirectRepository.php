@@ -49,7 +49,7 @@ class RedirectRepository extends Repository
 
     /**
      * @param string $sourceUriPath
-     * @param string $host Full qualified host name
+     * @param string|null $host Full qualified host name
      * @param boolean $fallback If not redirect found, match a redirect with host value as null
      * @return Redirect|null
      */
@@ -79,7 +79,7 @@ class RedirectRepository extends Repository
 
     /**
      * @param string $targetUriPath
-     * @param string $host Full qualified host name
+     * @param string|null $host Full qualified host name
      * @return Redirect|null
      */
     public function findOneByTargetUriPathAndHost(string $targetUriPath, ?string $host = null): ?Redirect
@@ -156,14 +156,14 @@ class RedirectRepository extends Repository
     /**
      * Finds all redirects filtered by the parameters and returns an IterableResult
      *
-     * @param string $host Fully qualified host name
+     * @param string|null $host Fully qualified host name
      * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
      * @param string|null $type Filters redirects by their type
-     * @param callable $callback
+     * @param callable|null $callback
      * @return \Generator<Redirect>
      * @throws \Exception
      */
-    public function findAllWithParameters(?string $host = null, bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
+    public function findAllWithParameters(?string $host = null, bool $onlyActive = false, ?string $type = null, ?callable $callback = null): \Generator
     {
         $query = $this->buildQuery($onlyActive, $type);
 
@@ -180,11 +180,11 @@ class RedirectRepository extends Repository
      *
      * @param bool $onlyActive Filters redirects which start and end datetime match the current datetime
      * @param string|null $type Filters redirects by their type
-     * @param callable $callback
+     * @param callable|null $callback
      * @return \Generator<Redirect>
      * @throws \Exception
      */
-    public function findAllWithoutHost(bool $onlyActive = false, ?string $type = null, callable $callback = null): \Generator
+    public function findAllWithoutHost(bool $onlyActive = false, ?string $type = null, ?callable $callback = null): \Generator
     {
         $query = $this->buildQuery($onlyActive, $type);
         $query->andWhere('r.host IS NULL');
@@ -254,10 +254,10 @@ class RedirectRepository extends Repository
      * Iterator over an IterableResult and return a Generator
      *
      * @param IterableResult $iterator
-     * @param callable $callback
+     * @param callable|null $callback
      * @return \Generator<RedirectDto>
      */
-    protected function iterate(IterableResult $iterator, callable $callback = null): \Generator
+    protected function iterate(IterableResult $iterator, ?callable $callback = null): \Generator
     {
         $iteration = 0;
         foreach ($iterator as $object) {
